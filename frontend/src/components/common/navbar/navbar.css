@@ -1,0 +1,355 @@
+:root {
+  --bg-primary: #fff;
+  --bg-secondary: #fafafa;
+  --logo-text: #000;
+  --separator: #d9d9d9;
+  --btn-hover: #f0efef;
+  --btn-active: #e5e5e5;
+  --item-text: #5c5e64;
+  --item-hover: #f6f6f6;
+  --item-active-bg: #e8e5e5;
+  --item-active-text: #000;
+  --tooltip-bg: #000;
+  --tooltip-text: #fff;
+  --switch-bg: #f0f0f0;
+  --switch-active: #fff;
+}
+.dark-theme {
+  --bg-primary: #161a23;
+  --bg-secondary: #2d2f39;
+  --logo-text: #c0c0c0;
+  --separator: #5c5f65;
+  --btn-hover: #202533;
+  --btn-active: #141720;
+  --item-text: #8a8c91;
+  --item-hover: #2d2f39;
+  --item-active-bg: #262831;
+  --item-active-text: #fff;
+  --tooltip-bg: #2d2f39;
+  --tooltip-text: #d5d5d7;
+  --switch-bg: #161a23;
+  --switch-active: #2d2f39;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+
+  min-height: 100vh;
+  font-family: "Poppins", serif;
+}
+body .sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  width: 19rem;
+  transition: width 0.4s, background-color 0.3s;
+  border-right: 1px solid var(--separator);
+}
+body .sidebar .header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-secondary);
+  position: relative;
+  transition: background-color 0.3s;
+}
+body .sidebar .header a {
+  text-decoration: none;
+  color: var(--logo-text);
+  font-size: 1.3rem;
+  font-weight: 550;
+}
+body .sidebar .header a .unfocus,
+body .sidebar .header a .focus {
+  display: inline-block;
+  max-width: 20rem;
+  overflow: hidden;
+  transition: all 0.4s, color 0.3s;
+}
+body .sidebar .header a .focus {
+  outline: 1px dashed transparent;
+  outline-offset: 0.5rem;
+  border-radius: 0.5px;
+}
+body .sidebar .header button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  color: var(--logo-text);
+  max-width: 20rem;
+  transition: background-color 0.3s, max-width 0.4s, opacity 0.4s,
+    visibility 0.4s, color 0.3s;
+}
+body .sidebar .header button i {
+  font-size: 1rem;
+}
+body .sidebar .header button:hover {
+  background-color: var(--btn-hover);
+}
+body .sidebar .header button:active {
+  background-color: var(--btn-active);
+}
+body .sidebar .separator-wrapper {
+  position: relative;
+}
+body .sidebar .separator-wrapper .separator {
+  margin: 0;
+  border: 0.5px solid var(--separator);
+  transition: border-color 0.3s;
+}
+body .sidebar .separator-wrapper .minimize-btn {
+  border: 1px solid var(--separator);
+  background-color: var(--bg-primary);
+  display: block;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(50%);
+  right: 0;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+body .sidebar .separator-wrapper .minimize-btn input {
+  display: none;
+}
+body .sidebar .separator-wrapper .minimize-btn i {
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+  color: var(--logo-text);
+  transition: all 0.3s;
+}
+body .sidebar .separator-wrapper .minimize-btn:hover {
+  background-color: var(--btn-hover);
+}
+body .sidebar .separator-wrapper .minimize-btn:active {
+  background-color: var(--btn-active);
+}
+body .sidebar .navigation {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+body .sidebar .navigation .section .title-wrapper {
+  height: 1.9rem;
+  position: relative;
+}
+body .sidebar .navigation .section .title-wrapper .title {
+  padding-inline: 0.5rem;
+  color: var(--item-text);
+  text-transform: uppercase;
+  transition: all 0.4s, color 0.3s;
+}
+body .sidebar .navigation .section .items {
+  padding: 0;
+  margin-block: 0.9rem;
+  list-style-type: none;
+}
+body .sidebar .navigation .section .items .item a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-inline: 0.5rem;
+  color: var(--item-text);
+  padding-block: 0.8rem;
+  border-radius: 0.4rem;
+  transition: background-color 0.3s, color 0.3s;
+  position: relative;
+}
+body .sidebar .navigation .section .items .item a i {
+  width: 1rem;
+  transition: all 0.4s;
+}
+body .sidebar .navigation .section .items .item a .item-text {
+  max-width: 20rem;
+  transition: all 0.4s;
+}
+body .sidebar .navigation .section .items .item a .item-tooltip {
+  position: absolute;
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  left: 109%;
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  display: none;
+}
+body .sidebar .navigation .section .items .item a .item-tooltip:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid var(--tooltip-bg);
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+body .sidebar .navigation .section .items .item a:hover {
+  background-color: var(--item-hover);
+}
+body .sidebar .navigation .section .items .item a:active {
+  background-color: var(--item-active-bg);
+  color: var(--item-active-text);
+}
+body .sidebar .navigation .section.settings-section {
+  position: fixed;
+  bottom: 0px;
+}
+body .sidebar .footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--separator);
+  padding: 1.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+body .sidebar .footer .switch {
+  display: block;
+  height: 3.1rem;
+  background-color: var(--switch-bg);
+  border-radius: 0.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+body .sidebar .footer .switch input {
+  display: none;
+}
+body .sidebar .footer .switch .item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--item-text);
+  position: relative;
+  z-index: 1;
+  max-width: 20rem;
+  transition: color 0.3s, max-width 0.3s;
+}
+body .sidebar .footer .switch .active {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  padding: 0.3rem;
+  transition: transform 0.2s;
+}
+body .sidebar .footer .switch .active:before {
+  content: "";
+  display: block;
+  background-color: var(--switch-active);
+  width: 100%;
+  height: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid var(--separator);
+  transform: translateX(0);
+  transition: all 0.3s;
+}
+body .sidebar .footer .switch:has(input:checked) .item:last-of-type {
+  color: var(--item-active-text);
+}
+body .sidebar .footer .switch:has(input:checked) .active {
+  transform: translateX(100%);
+}
+body .sidebar .footer .switch:not(:has(input:checked)) .item:first-of-type {
+  color: var(--item-active-text);
+}
+body .sidebar:has(#minimize:checked) {
+  width: 9rem;
+}
+body .sidebar:has(#minimize:checked) .header a .unfocus {
+  max-width: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+body .sidebar:has(#minimize:checked) .header a .focus {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) rotate(-15deg);
+  outline-color: var(--logo-text);
+}
+body .sidebar:has(#minimize:checked) .header button {
+  max-width: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+body
+  .sidebar:has(#minimize:checked)
+  .navigation
+  .section
+  .title-wrapper
+  .title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+body .sidebar:has(#minimize:checked) .navigation .section .items .item a i {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+body
+  .sidebar:has(#minimize:checked)
+  .navigation
+  .section
+  .items
+  .item
+  a
+  .item-text {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+body
+  .sidebar:has(#minimize:checked)
+  .navigation
+  .section
+  .items
+  .item
+  a
+  .item-tooltip {
+  display: block;
+}
+body
+  .sidebar:has(#minimize:checked)
+  .navigation
+  .section
+  .items
+  .item
+  a:hover
+  .item-tooltip {
+  left: 115%;
+  opacity: 1;
+  visibility: visible;
+}
+body .sidebar:has(#minimize:checked) .separator-wrapper .minimize-btn i {
+  transform: rotate(180deg);
+}
+body .sidebar:has(#minimize:checked) .footer .switch {
+  border-radius: 5rem;
+}
+body .sidebar:has(#minimize:checked) .footer .switch .item {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+body .sidebar:has(#minimize:checked) .footer .switch .active:before {
+  border-radius: 5rem;
+}
