@@ -51,6 +51,7 @@ exports.getAllDoctors = async (req, res) => {
       .populate("treatedPatients", "patientName age")
       .populate("juniorDoctors", "name grade");
 
+<<<<<<< HEAD
     if (doctors.length > 0) {
       res.status(200).json({
         success: true,
@@ -63,6 +64,16 @@ exports.getAllDoctors = async (req, res) => {
         message: "No doctors found!",
       });
     }
+=======
+    res.status(200).json({
+      success: true,
+      message:
+        doctors.length > 0
+          ? "Doctors Retrieved successfully!"
+          : "No doctors found!",
+      doctors,
+    });
+>>>>>>> cd162b2 (Backend and Frontend updated)
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -81,7 +92,11 @@ exports.getSingleDoctor = async (req, res) => {
       .populate("juniorDoctors", "name grade");
 
     if (!doctorDetail) {
+<<<<<<< HEAD
       return res.status(404).json({
+=======
+      return res.status(500).json({
+>>>>>>> cd162b2 (Backend and Frontend updated)
         success: false,
         message: "Doctor not found!",
       });

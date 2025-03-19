@@ -24,3 +24,36 @@ export const fetchData = async (
     throw error;
   }
 };
+<<<<<<< HEAD
+=======
+
+export const deleteData = async (endpoint, headers = {}) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const postData = async (endpoint, body, headers = {}) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/${endpoint}`, body, {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+>>>>>>> cd162b2 (Backend and Frontend updated)

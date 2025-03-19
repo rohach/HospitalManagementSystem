@@ -126,3 +126,26 @@
   background-color: rgba(24, 119, 242, 0.8);
   color: white;
 }
+<<<<<<< HEAD
+=======
+/* Action */
+.action_button_div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+.action_button {
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  font-size: 1rem;
+  outline: none;
+}
+.fa-pen-to-square {
+  color: green;
+}
+.fa-trash-can {
+  color: red;
+}
+>>>>>>> cd162b2 (Backend and Frontend updated)

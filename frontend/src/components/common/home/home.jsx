@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
 import "./home.css";
+<<<<<<< HEAD
 import { fetchData } from "../../../utils/api";
 import Error from "../../pages/Error";
 import Loading from "../../pages/Loading";
+=======
+import { deleteData, fetchData } from "../../../utils/api";
+import Error from "../../pages/Error";
+import Loading from "../../pages/Loading";
+import axios from "axios";
+>>>>>>> cd162b2 (Backend and Frontend updated)
 
 const Home = () => {
   const [patients, setPatients] = useState([]);
@@ -43,6 +50,69 @@ const Home = () => {
     getDoctors();
   }, []);
 
+<<<<<<< HEAD
+=======
+  const deletePatient = async (patientId) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this patient?"
+    );
+    if (!isConfirmed) return;
+
+    setLoading(true);
+    try {
+      const response = await deleteData(
+        `patient/getSinglePatient/${patientId}`
+      );
+      console.log("Patient deleted successfully!", response);
+
+      setPatients((prevPatients) =>
+        prevPatients.filter((patient) => patient._id !== patientId)
+      );
+      setPatientCount((prevCount) => prevCount - 1);
+    } catch (error) {
+      console.error("Failed to delete patient:", error.message);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete a Patient
+  // const deletePatient = async (patientId) => {
+  //   if (!window.confirm("Are you sure you want to delete this patient?")) {
+  //     return;
+  //   }
+
+  //   try {
+  //     const data = await fetchData(
+  //       `patient/getSinglePatient/${patientId}`,
+  //       "DELETE"
+  //     );
+
+  //     if (data.success) {
+  //       setPatients((prevPatients) =>
+  //         prevPatients.filter((p) => p._id !== patientId)
+  //       );
+  //       setPatientCount((prevCount) => prevCount - 1);
+  //     } else {
+  //       alert("Failed to delete the patient.");
+  //     }
+  //   } catch (error) {
+  //     alert("Error deleting patient.");
+  //     console.log(error);
+  //   }
+  // };
+
+  // Function to format date
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+>>>>>>> cd162b2 (Backend and Frontend updated)
   if (loading) {
     return <Loading />;
   }
@@ -92,6 +162,7 @@ const Home = () => {
       <div className="patients">
         <div className="title">View Patients</div>
         <table id="customers">
+<<<<<<< HEAD
           <tr>
             <th>Name</th>
             <th>Admitted Date</th>
@@ -150,6 +221,61 @@ const Home = () => {
             <td>Marie Bertrand</td>
             <td>France</td>
           </tr>
+=======
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Admitted Date</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Ward</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {patients.length > 0 ? (
+              patients.map((patient) => (
+                <tr key={patient._id}>
+                  <td>
+                    {patient.patientName} {patient.patientCaste}
+                  </td>
+                  <td>{formatDate(patient.createdAt)}</td>
+                  <td>{patient.gender}</td>
+                  <td>{patient.age}</td>
+                  <td>{patient.ward?.wardName || "N/A"}</td>
+                  <td>{patient.contact}</td>
+                  <td>{patient.status}</td>
+                  <td className="action_button_div">
+                    <button className="action_button">
+                      <i className="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button
+                      className="action_button"
+                      onClick={() => deletePatient(patient._id)}
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="8"
+                  style={{
+                    textAlign: "center",
+                    padding: "10px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  No patient data found
+                </td>
+              </tr>
+            )}
+          </tbody>
+>>>>>>> cd162b2 (Backend and Frontend updated)
         </table>
       </div>
     </div>

@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+<<<<<<< HEAD
+=======
+
+>>>>>>> cd162b2 (Backend and Frontend updated)
 const patientSchema = mongoose.Schema(
   {
     patientName: {
@@ -30,7 +34,11 @@ const patientSchema = mongoose.Schema(
     },
     ward: {
       type: mongoose.Schema.Types.ObjectId,
+<<<<<<< HEAD
       ref: "Team",
+=======
+      ref: "Ward",
+>>>>>>> cd162b2 (Backend and Frontend updated)
       required: true,
     },
     doctors: [
@@ -42,5 +50,22 @@ const patientSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+<<<<<<< HEAD
 const patientModel = new mongoose.model("Patient", patientSchema);
+=======
+
+// Virtual field to get the ward name dynamically
+patientSchema.virtual("wardName", {
+  ref: "Ward",
+  localField: "ward",
+  foreignField: "_id",
+  justOne: true,
+});
+
+// Ensure virtuals are included in JSON output
+patientSchema.set("toJSON", { virtuals: true });
+patientSchema.set("toObject", { virtuals: true });
+
+const patientModel = mongoose.model("Patient", patientSchema);
+>>>>>>> cd162b2 (Backend and Frontend updated)
 module.exports = patientModel;

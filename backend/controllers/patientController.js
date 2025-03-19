@@ -38,7 +38,11 @@ exports.registerPatient = async (req, res) => {
     await newPatient.save();
 
     const populatedPatient = await Patient.findById(newPatient._id)
+<<<<<<< HEAD
       .populate("ward")
+=======
+      .populate({ path: "ward", select: "wardName _id" })
+>>>>>>> cd162b2 (Backend and Frontend updated)
       .populate("doctors");
 
     return res.status(201).json({
@@ -58,6 +62,7 @@ exports.registerPatient = async (req, res) => {
 // Get all Patients
 exports.getAllPatients = async (req, res) => {
   try {
+<<<<<<< HEAD
     const patients = await Patient.find();
 
     if (patients) {
@@ -76,6 +81,25 @@ exports.getAllPatients = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Sorry, no patient details found!",
+=======
+    const patients = await Patient.find()
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate("doctors");
+
+    return res.status(200).json({
+      success: true,
+      message:
+        patients.length > 0
+          ? "Patients retrieved successfully!"
+          : "No patient details found!",
+      patients,
+    });
+  } catch (error) {
+    console.error("Error retrieving patients:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving patient details!",
+>>>>>>> cd162b2 (Backend and Frontend updated)
       error: error.message,
     });
   }
@@ -86,7 +110,13 @@ exports.getSinglePatient = async (req, res) => {
   try {
     const patientId = req.params.id;
 
+<<<<<<< HEAD
     const patientDetail = await Patient.findById(patientId);
+=======
+    const patientDetail = await Patient.findById(patientId)
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate("doctors");
+>>>>>>> cd162b2 (Backend and Frontend updated)
 
     if (!patientDetail) {
       return res.status(404).json({
@@ -113,7 +143,10 @@ exports.deletePatient = async (req, res) => {
   try {
     const { id: patientId } = req.params;
 
+<<<<<<< HEAD
     // Check if patient exists before deleting
+=======
+>>>>>>> cd162b2 (Backend and Frontend updated)
     const patientDetail = await Patient.findById(patientId);
     if (!patientDetail) {
       return res.status(404).json({
