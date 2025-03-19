@@ -8,9 +8,10 @@ const {
 } = require("../controllers/doctorController");
 
 const router = require("express").Router();
+const { uploadDoctorImage } = require("../controllers/doctorController"); // Import image upload middleware
 
 // Registering a Doctor
-router.route("/registerDoctor").post(registerDoctor);
+router.route("/registerDoctor").post(uploadDoctorImage, registerDoctor);
 
 // Getting all Doctors
 router.route("/getAllDoctors").get(getAllDoctors);
@@ -20,7 +21,7 @@ router
   .route("/getSingleDoctor/:id")
   .get(getSingleDoctor)
   .delete(deleteDoctor)
-  .put(updateDoctor);
+  .put(uploadDoctorImage, updateDoctor); // Use upload middleware for image when updating
 
 // Adding a treated patient to a doctor (Updated route)
 router.route("/addTreatedPatient/:doctorId").put(addTreatedPatient);

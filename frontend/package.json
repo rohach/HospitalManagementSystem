@@ -15,10 +15,7 @@
     "react-lottie": "^1.2.10",
     "react-router-dom": "^7.3.0",
     "react-scripts": "5.0.1",
-<<<<<<< HEAD
-=======
     "react-toastify": "^11.0.5",
->>>>>>> cd162b2 (Backend and Frontend updated)
     "web-vitals": "^4.2.4"
   },
   "scripts": {

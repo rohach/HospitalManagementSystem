@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./home.css";
-<<<<<<< HEAD
-import { fetchData } from "../../../utils/api";
-import Error from "../../pages/Error";
-import Loading from "../../pages/Loading";
-=======
 import { deleteData, fetchData } from "../../../utils/api";
 import Error from "../../pages/Error";
 import Loading from "../../pages/Loading";
 import axios from "axios";
->>>>>>> cd162b2 (Backend and Frontend updated)
 
 const Home = () => {
   const [patients, setPatients] = useState([]);
@@ -50,8 +44,6 @@ const Home = () => {
     getDoctors();
   }, []);
 
-<<<<<<< HEAD
-=======
   const deletePatient = async (patientId) => {
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this patient?"
@@ -77,32 +69,6 @@ const Home = () => {
     }
   };
 
-  // Delete a Patient
-  // const deletePatient = async (patientId) => {
-  //   if (!window.confirm("Are you sure you want to delete this patient?")) {
-  //     return;
-  //   }
-
-  //   try {
-  //     const data = await fetchData(
-  //       `patient/getSinglePatient/${patientId}`,
-  //       "DELETE"
-  //     );
-
-  //     if (data.success) {
-  //       setPatients((prevPatients) =>
-  //         prevPatients.filter((p) => p._id !== patientId)
-  //       );
-  //       setPatientCount((prevCount) => prevCount - 1);
-  //     } else {
-  //       alert("Failed to delete the patient.");
-  //     }
-  //   } catch (error) {
-  //     alert("Error deleting patient.");
-  //     console.log(error);
-  //   }
-  // };
-
   // Function to format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
@@ -112,7 +78,6 @@ const Home = () => {
     });
   };
 
->>>>>>> cd162b2 (Backend and Frontend updated)
   if (loading) {
     return <Loading />;
   }
@@ -162,66 +127,6 @@ const Home = () => {
       <div className="patients">
         <div className="title">View Patients</div>
         <table id="customers">
-<<<<<<< HEAD
-          <tr>
-            <th>Name</th>
-            <th>Admitted Date</th>
-            <th>Gender</th>
-            <th>Age</th>
-            <th>Ward</th>
-            <th>Contact</th>
-          </tr>
-          <tr>
-            <td>Alfreds Futterkiste</td>
-            <td>Maria Anders</td>
-            <td>Germany</td>
-          </tr>
-          <tr>
-            <td>Berglunds snabbköp</td>
-            <td>Christina Berglund</td>
-            <td>Sweden</td>
-          </tr>
-          <tr>
-            <td>Centro comercial Moctezuma</td>
-            <td>Francisco Chang</td>
-            <td>Mexico</td>
-          </tr>
-          <tr>
-            <td>Ernst Handel</td>
-            <td>Roland Mendel</td>
-            <td>Austria</td>
-          </tr>
-          <tr>
-            <td>Island Trading</td>
-            <td>Helen Bennett</td>
-            <td>UK</td>
-          </tr>
-          <tr>
-            <td>Königlich Essen</td>
-            <td>Philip Cramer</td>
-            <td>Germany</td>
-          </tr>
-          <tr>
-            <td>Laughing Bacchus Winecellars</td>
-            <td>Yoshi Tannamuri</td>
-            <td>Canada</td>
-          </tr>
-          <tr>
-            <td>Magazzini Alimentari Riuniti</td>
-            <td>Giovanni Rovelli</td>
-            <td>Italy</td>
-          </tr>
-          <tr>
-            <td>North/South</td>
-            <td>Simon Crowther</td>
-            <td>UK</td>
-          </tr>
-          <tr>
-            <td>Paris spécialités</td>
-            <td>Marie Bertrand</td>
-            <td>France</td>
-          </tr>
-=======
           <thead>
             <tr>
               <th>Name</th>
@@ -275,7 +180,6 @@ const Home = () => {
               </tr>
             )}
           </tbody>
->>>>>>> cd162b2 (Backend and Frontend updated)
         </table>
       </div>
     </div>

@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #wrapper {
   background: #fff;
   position: relative;
@@ -36,7 +34,6 @@
   position: relative;
   width: 60%;
 }
->>>>>>> cd162b2 (Backend and Frontend updated)
 :root {
   --bg-primary: #fff;
   --bg-secondary: #fafafa;
@@ -83,18 +80,12 @@ body .sidebar {
   flex-direction: column;
   background-color: var(--bg-primary);
   min-height: 100vh;
-<<<<<<< HEAD
-  width: 19rem;
-  transition: width 0.4s, background-color 0.3s;
-  border-right: 1px solid var(--separator);
-=======
   /* width: 19rem; */
   transition: width 0.4s, background-color 0.3s;
   border-right: 1px solid var(--separator);
   overflow-y: scroll;
   scrollbar-width: none; /* For Firefox */
   -ms-overflow-style: none; /* For Internet Explorer and Edge */
->>>>>>> cd162b2 (Backend and Frontend updated)
 }
 body .sidebar .header {
   padding: 1.5rem;
@@ -165,11 +156,7 @@ body .sidebar .separator-wrapper .minimize-btn {
   justify-content: center;
   position: absolute;
   top: 50%;
-<<<<<<< HEAD
-  transform: translateY(-50%) translateX(50%);
-=======
   transform: translateY(-50%) translateX(0%);
->>>>>>> cd162b2 (Backend and Frontend updated)
   right: 0;
   cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s;
@@ -190,16 +177,11 @@ body .sidebar .separator-wrapper .minimize-btn:active {
   background-color: var(--btn-active);
 }
 body .sidebar .navigation {
-<<<<<<< HEAD
-  padding: 1.5rem;
-  flex-grow: 1;
-=======
   padding: 1rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
->>>>>>> cd162b2 (Backend and Frontend updated)
 }
 body .sidebar .navigation .section .title-wrapper {
   height: 1.9rem;
@@ -268,13 +250,8 @@ body .sidebar .navigation .section .items .item a:active {
   color: var(--item-active-text);
 }
 body .sidebar .navigation .section.settings-section {
-<<<<<<< HEAD
-  position: fixed;
-  bottom: 0px;
-=======
   /* position: fixed;
   bottom: 0px; */
->>>>>>> cd162b2 (Backend and Frontend updated)
 }
 body .sidebar .footer {
   background-color: var(--bg-secondary);

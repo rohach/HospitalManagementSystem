@@ -1,0 +1,61 @@
+.doctor {
+  display: flex;
+  flex-direction: column;
+  height: max-content;
+  width: 100%;
+}
+.doctors_heading {
+  display: flex;
+  padding: 2rem 2rem 2rem 0;
+  justify-content: space-between;
+}
+.doctors_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.doctors_div {
+  height: 400px; /* Set a fixed height */
+  width: 23%; /* Maintain the width as is */
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  border-radius: 10px;
+  padding: 1rem 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.doctors_div > img {
+  height: 70%;
+  width: 100%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.doc_name {
+  font-size: 1.2rem;
+  color: #3734a9;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.5rem;
+}
+.doc_desc {
+  color: rgb(103, 103, 103);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+.team,
+.grade {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+.view_more {
+  margin-top: 0.25rem;
+  border: none;
+  font-weight: bold;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  color: rgb(103, 103, 103);
+}

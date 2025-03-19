@@ -28,9 +28,27 @@ const doctorSchema = new mongoose.Schema(
         ref: "Doctor",
       },
     ],
+    image: {
+      type: String,
+      default: "",
+    },
+    wards: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ward",
+      },
+    ],
   },
   { timestamps: true }
 );
+
+// Method to populate treated patients and wards' names
+doctorSchema.methods.getDetailedDoctorInfo = function () {
+  return this.populate([
+    { path: "treatedPatients", select: "patientName" }, // Corrected to treatedPatients
+    { path: "wards", select: "wardName" }, // Populate wardName
+  ]);
+};
 
 const doctorModel = mongoose.model("Doctor", doctorSchema);
 module.exports = doctorModel;

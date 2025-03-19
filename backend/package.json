@@ -1,9 +1,6 @@
 {
   "dependencies": {
-<<<<<<< HEAD
-=======
     "bcryptjs": "^3.0.2",
->>>>>>> cd162b2 (Backend and Frontend updated)
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

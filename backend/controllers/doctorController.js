@@ -1,10 +1,14 @@
 const Doctor = require("../models/doctorModel");
 const Patient = require("../models/patientModel");
+const Ward = require("../models/wardModel");
+const upload = require("../middleware/multer"); // Import multer middleware
+const fs = require("fs"); // To handle file deletion when updating or deleting doctors
 
 // Register a Doctor
 exports.registerDoctor = async (req, res) => {
   try {
-    const { name, grade, team, treatedPatients, juniorDoctors } = req.body;
+    const { name, grade, team, treatedPatients, juniorDoctors, wardName } =
+      req.body;
 
     // Check if doctor already exists
     const doctorExists = await Doctor.findOne({ name, team });
@@ -13,6 +17,12 @@ exports.registerDoctor = async (req, res) => {
         success: false,
         message: "Doctor with this name in the team already exists!",
       });
+    }
+
+    // If there's an image uploaded, handle file saving
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = req.file.path; // Save the file path in the DB
     }
 
     // Ensure treatedPatients and juniorDoctors are arrays
@@ -26,8 +36,23 @@ exports.registerDoctor = async (req, res) => {
       juniorDoctors: Array.isArray(juniorDoctors)
         ? juniorDoctors
         : [juniorDoctors],
+      image: imageUrl, // Save image path in DB
     });
 
+    // Check if the wardName is provided and the ward exists
+    if (wardName) {
+      const ward = await Ward.findOne({ wardName }); // Find ward by name
+      if (ward) {
+        newDoctor.wards = [ward._id]; // Associate the ward with the doctor (ensure it's an array)
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Ward not found with the provided name!",
+        });
+      }
+    }
+
+    // Save doctor
     await newDoctor.save();
 
     return res.status(201).json({
@@ -51,20 +76,6 @@ exports.getAllDoctors = async (req, res) => {
       .populate("treatedPatients", "patientName age")
       .populate("juniorDoctors", "name grade");
 
-<<<<<<< HEAD
-    if (doctors.length > 0) {
-      res.status(200).json({
-        success: true,
-        message: "Doctors Retrieved successfully!",
-        doctors,
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: "No doctors found!",
-      });
-    }
-=======
     res.status(200).json({
       success: true,
       message:
@@ -73,7 +84,6 @@ exports.getAllDoctors = async (req, res) => {
           : "No doctors found!",
       doctors,
     });
->>>>>>> cd162b2 (Backend and Frontend updated)
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -92,11 +102,7 @@ exports.getSingleDoctor = async (req, res) => {
       .populate("juniorDoctors", "name grade");
 
     if (!doctorDetail) {
-<<<<<<< HEAD
-      return res.status(404).json({
-=======
       return res.status(500).json({
->>>>>>> cd162b2 (Backend and Frontend updated)
         success: false,
         message: "Doctor not found!",
       });
@@ -128,6 +134,11 @@ exports.deleteDoctor = async (req, res) => {
       });
     }
 
+    // Delete image file if it exists
+    if (doctorDetail.image) {
+      fs.unlinkSync(doctorDetail.image);
+    }
+
     await Doctor.findByIdAndDelete(doctorId);
 
     res.status(200).json({
@@ -155,6 +166,15 @@ exports.updateDoctor = async (req, res) => {
         success: false,
         message: "Doctor not found!",
       });
+    }
+
+    // If a new image is uploaded, update the image field and delete old image
+    if (req.file) {
+      // Delete old image file if it exists
+      if (doctorDetail.image) {
+        fs.unlinkSync(doctorDetail.image);
+      }
+      updateData.image = req.file.path; // Save new image path
     }
 
     const updatedDoctor = await Doctor.findByIdAndUpdate(doctorId, updateData, {
@@ -212,3 +232,6 @@ exports.addTreatedPatient = async (req, res) => {
     });
   }
 };
+
+// Define Multer upload middleware for image file upload (for doctor registration and update)
+exports.uploadDoctorImage = upload.single("image"); // 'image' is the fieldname in the form

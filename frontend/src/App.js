@@ -1,17 +1,10 @@
-<<<<<<< HEAD
-import "./App.css";
-import Layout from "./layout";
-
-function App() {
-  return (
-    <>
-      <Layout />
-=======
 import { useEffect, useState } from "react";
 import "./App.css";
 import Navbar from "./components/common/navbar/navbar";
-import Layout from "./layout";
 import Login from "./components/common/auth/login";
+import Layout from "./layout";
+import { Routes, Route } from "react-router-dom";
+import Doctors from "./components/common/Doctors/Doctors";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,24 +12,25 @@ function App() {
   // Check if the user is logged in by looking for a token in localStorage
   const loginStatus = () => {
     const token = localStorage.getItem("authToken");
-    setIsLoggedIn(!!token); // set isLoggedIn to true if token exists, otherwise false
+    setIsLoggedIn(!!token);
   };
 
   useEffect(() => {
-    loginStatus(); // Check login status on initial render
+    loginStatus();
   }, []);
 
-  // Conditionally render Login or Navbar + Layout based on isLoggedIn
   return (
     <>
       {!isLoggedIn ? (
-        <Login /> // Show Login page if not logged in
+        <Login />
       ) : (
         <>
           <Navbar />
+          <Routes>
+            {/* <Route path="doctors" element={<Doctors />} /> */}
+          </Routes>
         </>
       )}
->>>>>>> cd162b2 (Backend and Frontend updated)
     </>
   );
 }

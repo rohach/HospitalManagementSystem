@@ -24,8 +24,6 @@ export const fetchData = async (
     throw error;
   }
 };
-<<<<<<< HEAD
-=======
 
 export const deleteData = async (endpoint, headers = {}) => {
   try {
@@ -56,4 +54,3 @@ export const postData = async (endpoint, body, headers = {}) => {
     throw error;
   }
 };
->>>>>>> cd162b2 (Backend and Frontend updated)

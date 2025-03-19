@@ -6,11 +6,8 @@
   list-style: none;
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.3px;
-<<<<<<< HEAD
-=======
   text-decoration: none;
   list-style: none;
->>>>>>> cd162b2 (Backend and Frontend updated)
 }
 :root {
   --widthLg: 100%;
@@ -25,11 +22,8 @@
 }
 body {
   background-color: var(--bg);
-<<<<<<< HEAD
-=======
   height: 100%;
   width: 100%;
->>>>>>> cd162b2 (Backend and Frontend updated)
 }
 .title {
   font-size: 1.5rem;
