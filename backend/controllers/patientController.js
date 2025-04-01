@@ -1,7 +1,8 @@
 const Patient = require("../models/patientModel");
-const upload = require("../middleware/multer"); // Import multer middleware
+const Doctor = require("../models/doctorModel"); // Import Doctor model
+const Ward = require("../models/wardModel");
 const fs = require("fs"); // To handle file deletion when updating or deleting patients
-const Ward = require("../models/wardModel"); // Import Ward model
+const upload = require("../middleware/multer"); // Import multer middleware
 
 // Register a Patient
 exports.registerPatient = async (req, res) => {
@@ -14,7 +15,7 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors,
+      doctors, // Ensure doctors is passed as an array of doctor IDs
     } = req.body;
 
     // Check if patient already exists
@@ -41,21 +42,41 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors,
+      doctors, // Add the doctors to the patient object (must be an array of doctor ObjectIds)
       image: imageUrl, // Save image path in DB
     });
 
+    // Save the patient to the database
     await newPatient.save();
+
+    // After saving the patient, increment the occupiedBeds count of the ward and add patient to ward's patients array
+    const updatedWard = await Ward.findByIdAndUpdate(
+      ward,
+      {
+        $inc: { occupiedBeds: 1 }, // Increment the occupiedBeds by 1
+        $push: { patients: newPatient._id }, // Push the new patient's ID into the patients array
+      },
+      { new: true }
+    ).populate("patients");
+
+    // Update each doctor associated with the patient to include the patient's ID in their list of patients
+    if (doctors && doctors.length > 0) {
+      await Doctor.updateMany(
+        { _id: { $in: doctors } }, // Find doctors whose IDs are in the doctors array
+        { $push: { patients: newPatient._id } } // Add the patient's ID to the doctor's patients array
+      );
+    }
 
     // Populate patient with ward and doctor details
     const populatedPatient = await Patient.findById(newPatient._id)
-      .populate({ path: "ward", select: "wardName _id" })
+      .populate("ward")
       .populate("doctors");
 
     return res.status(201).json({
       success: true,
       message: "Patient registered successfully!",
       patient: populatedPatient,
+      ward: updatedWard, // Return the updated ward with the new patient included
     });
   } catch (error) {
     return res.status(500).json({
@@ -119,24 +140,27 @@ exports.getSinglePatient = async (req, res) => {
   }
 };
 
-// Delete Single Patient
+// Delete Patient
 exports.deletePatient = async (req, res) => {
   try {
-    const { id: patientId } = req.params;
+    const patientId = req.params.id;
 
-    const patientDetail = await Patient.findById(patientId);
-    if (!patientDetail) {
+    // Find the patient first
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
       return res.status(404).json({
         success: false,
         message: "Patient not found!",
       });
     }
 
-    // Delete image file if it exists
-    if (patientDetail.image) {
-      fs.unlinkSync(patientDetail.image);
-    }
+    // Update the Ward to remove the patient from its patients array
+    await Ward.updateMany(
+      { patients: patientId }, // Find wards that have this patient
+      { $pull: { patients: patientId } } // Remove patient from the ward's patients array
+    );
 
+    // Now delete the patient from the Patient collection
     await Patient.findByIdAndDelete(patientId);
 
     res.status(200).json({

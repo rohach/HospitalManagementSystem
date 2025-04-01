@@ -19,7 +19,7 @@ router.route("/getAllPatients").get(getAllPatients);
 // Get, delete, and update single Patient
 router
   .route("/getSinglePatient/:id")
-  .get(authMiddleware, getSinglePatient)
+  .get(getSinglePatient)
   .delete(deletePatient)
   .put(upload.single("image"), updatePatient); // Adding the image upload middleware for update
 

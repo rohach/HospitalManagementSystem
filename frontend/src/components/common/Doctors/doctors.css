@@ -68,3 +68,32 @@
   cursor: pointer;
   color: rgb(103, 103, 103);
 }
+#pagination {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+#pagination li {
+  display: inline;
+  margin: 1rem;
+}
+#pagination li a {
+  display: inline-block;
+  text-decoration: none;
+  padding: 5px 10px;
+  color: #000;
+}
+
+/* Active and Hoverable Pagination */
+#pagination li a {
+  border-radius: 5px;
+  -webkit-transition: background-color 0.3s;
+  transition: background-color 0.3s;
+}
+#pagination li a.active {
+  background-color: #4caf50;
+  color: #fff;
+}
+#pagination li a:hover:not(.active) {
+  background-color: #ddd;
+}

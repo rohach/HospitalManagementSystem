@@ -7,7 +7,7 @@ const fs = require("fs"); // To handle file deletion when updating or deleting d
 // Register a Doctor
 exports.registerDoctor = async (req, res) => {
   try {
-    const { name, grade, team, treatedPatients, juniorDoctors, wardName } =
+    const { name, grade, team, treatedPatients, juniorDoctors, wardId } =
       req.body;
 
     // Check if doctor already exists
@@ -39,28 +39,37 @@ exports.registerDoctor = async (req, res) => {
       image: imageUrl, // Save image path in DB
     });
 
-    // Check if the wardName is provided and the ward exists
-    if (wardName) {
-      const ward = await Ward.findOne({ wardName }); // Find ward by name
-      if (ward) {
-        newDoctor.wards = [ward._id]; // Associate the ward with the doctor (ensure it's an array)
-      } else {
+    // Check if the wardId is provided and the ward exists
+    if (wardId) {
+      const ward = await Ward.findById(wardId); // Find ward by ID
+      if (!ward) {
         return res.status(400).json({
           success: false,
-          message: "Ward not found with the provided name!",
+          message: "Ward not found with the provided ID!",
         });
       }
+      // If ward is found, add doctor to the ward's doctors array
+      if (!ward.doctors) ward.doctors = []; // Ensure doctors array exists
+      ward.doctors.push(newDoctor._id);
+
+      // Add the ward to the new doctor's wards array
+      newDoctor.wards.push(ward._id);
+
+      // Save the updated ward and the new doctor
+      await ward.save();
     }
 
-    // Save doctor
+    // Save the doctor to the database
     await newDoctor.save();
 
+    // Return success response with full doctor and populated ward details
     return res.status(201).json({
       success: true,
       message: "Doctor registered successfully!",
       doctor: newDoctor,
     });
   } catch (error) {
+    console.error("Error:", error); // Log the error for debugging
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -74,7 +83,8 @@ exports.getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find()
       .populate("treatedPatients", "patientName age")
-      .populate("juniorDoctors", "name grade");
+      .populate("juniorDoctors", "name grade")
+      .populate("wards", "wardName occupiedBeds");
 
     res.status(200).json({
       success: true,
@@ -99,7 +109,8 @@ exports.getSingleDoctor = async (req, res) => {
     const doctorId = req.params.id;
     const doctorDetail = await Doctor.findById(doctorId)
       .populate("treatedPatients", "patientName age")
-      .populate("juniorDoctors", "name grade");
+      .populate("juniorDoctors", "name grade")
+      .populate("wards", "wardName");
 
     if (!doctorDetail) {
       return res.status(500).json({
@@ -134,11 +145,18 @@ exports.deleteDoctor = async (req, res) => {
       });
     }
 
+    // Remove the doctor from associated wards
+    await Ward.updateMany(
+      { doctors: doctorId },
+      { $pull: { doctors: doctorId } }
+    );
+
     // Delete image file if it exists
     if (doctorDetail.image) {
       fs.unlinkSync(doctorDetail.image);
     }
 
+    // Delete the doctor
     await Doctor.findByIdAndDelete(doctorId);
 
     res.status(200).json({
@@ -182,7 +200,8 @@ exports.updateDoctor = async (req, res) => {
       runValidators: true,
     })
       .populate("treatedPatients", "patientName age")
-      .populate("juniorDoctors", "name grade");
+      .populate("juniorDoctors", "name grade")
+      .populate("wards", "wardName");
 
     res.status(200).json({
       success: true,
@@ -219,10 +238,16 @@ exports.addTreatedPatient = async (req, res) => {
       });
     }
 
+    // Update the patient and add the doctor to their treatedBy array (or similar array)
+    const patient = await Patient.findByIdAndUpdate(patientId, {
+      $addToSet: { treatedBy: doctorId },
+    });
+
     res.status(200).json({
       success: true,
       message: "Patient added to treated list successfully!",
       doctor,
+      patient,
     });
   } catch (error) {
     res.status(500).json({

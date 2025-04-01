@@ -1,31 +1,39 @@
 const Ward = require("../models/wardModel");
+const Patient = require("../models/patientModel"); // Assuming you have a Patient model
 
 // Adding a Ward
 exports.addWard = async (req, res) => {
   try {
-    const { wardName, wardType, capacity, occupiedBeds, patients } = req.body;
+    const { wardName, wardType, capacity, patients } = req.body;
+
+    // Check if the ward already exists
     const existingWard = await Ward.findOne({ wardName });
     if (existingWard) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Ward with this name already exists!",
       });
-    } else {
-      const newWard = new Ward({
-        wardName,
-        wardType,
-        capacity,
-        occupiedBeds,
-        patients,
-      });
-      await newWard.save();
-
-      return res.status(201).json({
-        success: true,
-        message: "Ward Added!",
-        team: newWard,
-      });
     }
+
+    // Set the number of occupied beds dynamically based on patients
+    const occupiedBeds = patients.length; // Dynamically set the occupied beds
+
+    // Create a new ward
+    const newWard = new Ward({
+      wardName,
+      wardType,
+      capacity,
+      occupiedBeds,
+      patients,
+    });
+
+    await newWard.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Ward Added!",
+      ward: newWard,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -35,7 +43,7 @@ exports.addWard = async (req, res) => {
   }
 };
 
-// Get All wards
+// Get All Wards
 exports.getAllWards = async (req, res) => {
   try {
     const wards = await Ward.find();
@@ -60,7 +68,7 @@ exports.getAllWards = async (req, res) => {
   }
 };
 
-// Get single ward
+// Get Single Ward
 exports.getSingleWard = async (req, res) => {
   try {
     const ward = await Ward.findById(req.params.id);
@@ -72,7 +80,7 @@ exports.getSingleWard = async (req, res) => {
     } else {
       return res.status(404).json({
         success: false,
-        message: "Wards not found!",
+        message: "Ward not found!",
       });
     }
   } catch (error) {
@@ -95,10 +103,20 @@ exports.deleteWard = async (req, res) => {
         message: "Ward not found!",
       });
     }
+
+    // Remove patients from the ward before deleting it
+    const patientIds = wardDetail.patients; // Get patient IDs
+    await Patient.updateMany(
+      { _id: { $in: patientIds } },
+      { $pull: { wards: wardDetail._id } } // Remove this ward from patients' ward list
+    );
+
+    // Delete the ward
     await Ward.findByIdAndDelete(req.params.id);
+
     res.status(200).json({
       success: true,
-      message: "Ward deleted successfully!",
+      message: "Ward and its patients' ward association deleted successfully!",
     });
   } catch (error) {
     res.status(500).json({
