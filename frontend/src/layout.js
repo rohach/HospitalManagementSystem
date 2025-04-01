@@ -4,15 +4,35 @@ import Home from "./components/common/home/home";
 import NotFound from "./components/pages/NotFound";
 import "./layout.css";
 import Doctors from "./components/common/Doctors/Doctors";
+import Patients from "./components/common/Patients/Patients";
 
-const Layout = () => {
+const Layout = ({ isLoggedIn, userRole, userData }) => {
   return (
     <div className="content">
       <div className="main">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="doctors" element={<Doctors />} />
+          <Route
+            path="doctors"
+            element={
+              <Doctors
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                userData={userData}
+              />
+            }
+          />
+          <Route
+            path="patients"
+            element={
+              <Patients
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                userData={userData}
+              />
+            }
+          />
         </Routes>
       </div>
       {/* <Footer /> */}

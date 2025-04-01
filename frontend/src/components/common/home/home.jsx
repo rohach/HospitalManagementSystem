@@ -3,7 +3,7 @@ import "./home.css";
 import { deleteData, fetchData } from "../../../utils/api";
 import Error from "../../pages/Error";
 import Loading from "../../pages/Loading";
-import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const [patients, setPatients] = useState([]);
@@ -71,7 +71,12 @@ const Home = () => {
 
   // Function to format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
+    if (!dateString) return "N/A"; // Handle undefined/null values
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A"; // Ensure it's a valid date
+
+    return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -96,7 +101,9 @@ const Home = () => {
               <i className="fa-solid fa-user icon doctor_icon"></i>
             </div>
             <p className="box_count">{doctorCount}</p>
-            <button className="see_more">See More</button>
+            <Link to="/doctors">
+              <button className="see_more">See More</button>
+            </Link>
           </div>
           <div className="box patientCount">
             <p className="box_heading">Total Patients</p>
@@ -104,7 +111,10 @@ const Home = () => {
               <i className="fa-solid fa-users icon patient_icon"></i>
             </div>
             <p className="box_count">{patientCount}</p>
-            <button className="see_more">See More</button>
+            <Link to="/patients">
+              {" "}
+              <button className="see_more">See More</button>
+            </Link>
           </div>
           <div className="box wardCount">
             <p className="box_heading">Available Wards</p>

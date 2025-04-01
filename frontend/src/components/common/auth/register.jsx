@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import "./login.css";
 import Lottie from "react-lottie";
-import LoginAnimation from "../../../animations/login.json";
+import LoginAnimation from "../../../animations/register.json";
 import { postData } from "../../../utils/api";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage"; // Import notify function
 import { Link } from "react-router-dom";
 
 const Login = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,15 +29,15 @@ const Login = () => {
     setErrorMessage("");
 
     try {
-      const response = await postData("auth/login", { email, password });
+      const response = await postData("auth/register", {
+        name,
+        email,
+        password,
+      });
       notify(response?.message, "success");
-
-      // Storing JWT token in localStorage
-      localStorage.setItem("authToken", response?.token);
-      localStorage.setItem("user", JSON.stringify(response?.user));
       window.location.href = "/";
     } catch (error) {
-      notify(error.response?.data?.message || "Login failed", "error");
+      notify(error.response?.data?.message || "Registration failed", "error");
     } finally {
       setLoading(false);
     }
@@ -46,13 +47,23 @@ const Login = () => {
     <div className="login">
       <ToastifyComponent />
       <div className="container login_container">
+        <div className="login_right">
+          <Lottie options={defaultOptions} height={500} width={500} />
+        </div>
         <div className="login_left">
-          <h1>Sign In</h1>
+          <h1>Sign Up</h1>
           <form onSubmit={handleLogin}>
+            <input
+              type="name"
+              className="input_field"
+              placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <input
               type="email"
               className="input_field"
-              placeholder="Your Username"
+              placeholder="Your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -64,20 +75,17 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
             <button className="submit" type="submit" disabled={loading}>
-              {loading ? "Logging in..." : "Sign In"}
+              {loading ? "Logging in..." : "Sign Up"}
             </button>
           </form>
           <p className="register">
-            Don't have an account?{" "}
-            <Link to="/register" style={{ color: "rgb(100, 100, 100)" }}>
+            Already have an account?{" "}
+            <Link to="/" style={{ color: "rgb(100, 100, 100)" }}>
               <span style={{ fontWeight: "bold", cursor: "pointer" }}>
                 Click here.
               </span>
             </Link>
           </p>
-        </div>
-        <div className="login_right">
-          <Lottie options={defaultOptions} height={500} width={500} />
         </div>
       </div>
     </div>

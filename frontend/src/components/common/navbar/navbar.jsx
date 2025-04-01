@@ -1,12 +1,10 @@
 import React from "react";
 import "./navbar.css";
-import logo from "../../assets/logo.png";
 import Layout from "../../../layout";
-import Login from "../auth/login";
 import { notify } from "../../pages/ToastMessage";
 import { Link } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ isLoggedIn, userRole, userData }) => {
   const logOut = () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
 
@@ -15,7 +13,7 @@ const Navbar = () => {
         localStorage.clear();
         notify("Logged Out Successfully", "success");
         console.log("Logged Out");
-        window.location.href = "/login";
+        window.location.href = "/";
       } catch (error) {
         console.log("Error:", error);
         notify("Server Error", "error");
@@ -54,48 +52,84 @@ const Navbar = () => {
                       <span className="item-tooltip">Dashboard</span>
                     </Link>
                   </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-calendar-days"></i>
-                      <span className="item-text">Appointments</span>
-                      <span className="item-tooltip">Appointments</span>
-                    </a>
-                  </li>
-                  <li className="item">
-                    <Link to="doctors">
-                      <i className="fa-solid fa-user-doctor"></i>
-                      <span className="item-text">Doctors</span>
-                      <span className="item-tooltip">Doctors</span>
-                    </Link>
-                  </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-users"></i>
-                      <span className="item-text">Patients</span>
-                      <span className="item-tooltip">Patients</span>
-                    </a>
-                  </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-bed"></i>
-                      <span className="item-text">Wards</span>
-                      <span className="item-tooltip">Wards</span>
-                    </a>
-                  </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-file-medical"></i>
-                      <span className="item-text">Records</span>
-                      <span className="item-tooltip">Records</span>
-                    </a>
-                  </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-clipboard"></i>
-                      <span className="item-text">Treatments</span>
-                      <span className="item-tooltip">Treatments</span>
-                    </a>
-                  </li>
+                  {(userRole === 1 || userRole === 0) && (
+                    <>
+                      <li className="item">
+                        <a href="#">
+                          <i className="fa-solid fa-calendar-days"></i>
+                          <span className="item-text">Appointments</span>
+                          <span className="item-tooltip">Appointments</span>
+                        </a>
+                      </li>
+                      <li className="item">
+                        <Link to="doctors">
+                          <i className="fa-solid fa-user-doctor"></i>
+                          <span className="item-text">Doctors</span>
+                          <span className="item-tooltip">Doctors</span>
+                        </Link>
+                      </li>
+                      <li className="item">
+                        <Link to="patients">
+                          <i className="fa-solid fa-users"></i>
+                          <span className="item-text">Patients</span>
+                          <span className="item-tooltip">Patients</span>
+                        </Link>
+                      </li>
+                      <li className="item">
+                        <a href="#">
+                          <i className="fa-solid fa-bed"></i>
+                          <span className="item-text">Wards</span>
+                          <span className="item-tooltip">Wards</span>
+                        </a>
+                      </li>
+                      <li className="item">
+                        <a href="#">
+                          <i className="fa-solid fa-file-medical"></i>
+                          <span className="item-text">Records</span>
+                          <span className="item-tooltip">Records</span>
+                        </a>
+                      </li>
+                      <li className="item">
+                        <a href="#">
+                          <i className="fa-solid fa-clipboard"></i>
+                          <span className="item-text">Treatments</span>
+                          <span className="item-tooltip">Treatments</span>
+                        </a>
+                      </li>
+                    </>
+                  )}
+                  {userRole === -1 && (
+                    <>
+                      <li className="item">
+                        <Link to="patients">
+                          <i className="fa-solid fa-user-doctor"></i>
+                          <span className="item-text">Profile</span>
+                          <span className="item-tooltip">Profile</span>
+                        </Link>
+                      </li>
+                      <li className="item">
+                        <Link to="doctors">
+                          <i className="fa-solid fa-user-doctor"></i>
+                          <span className="item-text">Doctor</span>
+                          <span className="item-tooltip">Doctor</span>
+                        </Link>
+                      </li>
+                      <li className="item">
+                        <Link to="doctors">
+                          <i className="fa-solid fa-user-doctor"></i>
+                          <span className="item-text">Ward</span>
+                          <span className="item-tooltip">Ward</span>
+                        </Link>
+                      </li>
+                      <li className="item">
+                        <Link to="doctors">
+                          <i className="fa-solid fa-user-doctor"></i>
+                          <span className="item-text">Records</span>
+                          <span className="item-tooltip">Records</span>
+                        </Link>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
               <div className="section settings-section">
@@ -127,7 +161,11 @@ const Navbar = () => {
           </section>
         </div>
         <div id="content-wrapper">
-          <Layout />
+          <Layout
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            userData={userData}
+          />
         </div>
       </div>
     </>

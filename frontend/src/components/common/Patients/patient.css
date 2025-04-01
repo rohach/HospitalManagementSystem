@@ -1,0 +1,122 @@
+.patient {
+  padding: 1rem;
+}
+.patient_image {
+  height: 40px;
+  width: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+/* Patient's view */
+.patient_div {
+  display: flex;
+  gap: 2rem;
+  width: 98%;
+  padding: 3rem;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+.patient_profile {
+  border-right: 1px solid rgb(198, 198, 198);
+  padding-right: 1rem;
+}
+.patient_img {
+  height: 200px;
+  width: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 0.5rem;
+}
+.patient_name {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+.email {
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.delete_profile {
+  padding: 0.5rem 0.75rem;
+  border-radius: 50px;
+  color: rgb(235, 21, 21);
+  border: 1px solid rgb(235, 21, 21);
+  cursor: pointer;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+.patient_info {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.patient_info_div {
+  width: calc(90% / 3);
+  padding: 1rem;
+  height: 30%;
+}
+.patient_info_div_title {
+  color: var(--text);
+}
+.patient_info_div_info {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+/* Popup */
+
+.ppcontainer {
+  width: 80%;
+  margin: 5px auto;
+  padding: 2rem;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.clearfix {
+  clear: both;
+}
+
+.form_title {
+  display: flex;
+  justify-content: space-between;
+}
+.form-part h2 {
+  font-size: 25px;
+  font-weight: 400;
+  font-family: "Josefin Sans", sans-serif;
+  margin-bottom: 15px;
+}
+
+.text-input,
+.radio-button,
+.check-boxes {
+  margin-bottom: 13px;
+  width: 100% !important;
+}
+
+.text-input label,
+.radio-button label,
+.check-boxes label {
+  display: block;
+  margin-bottom: 3px;
+  font-family: "Josefin Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.radio-button label,
+.check-boxes label {
+  margin-bottom: 7px;
+  font-weight: 900;
+}
+
+.text-input input,
+.text-input textarea,
+.text-input select {
+  padding: 10px 10px;
+  display: block;
+  width: 100%;
+  border: solid 3px #ccc;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}

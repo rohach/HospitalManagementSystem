@@ -1,4 +1,7 @@
 const Patient = require("../models/patientModel");
+const upload = require("../middleware/multer"); // Import multer middleware
+const fs = require("fs"); // To handle file deletion when updating or deleting patients
+const Ward = require("../models/wardModel"); // Import Ward model
 
 // Register a Patient
 exports.registerPatient = async (req, res) => {
@@ -23,6 +26,12 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
+    // If there's an image uploaded, handle file saving
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = req.file.path; // Save the file path in the DB
+    }
+
     // Create a new patient
     const newPatient = new Patient({
       patientName,
@@ -33,10 +42,12 @@ exports.registerPatient = async (req, res) => {
       status,
       ward,
       doctors,
+      image: imageUrl, // Save image path in DB
     });
 
     await newPatient.save();
 
+    // Populate patient with ward and doctor details
     const populatedPatient = await Patient.findById(newPatient._id)
       .populate({ path: "ward", select: "wardName _id" })
       .populate("doctors");
@@ -71,7 +82,6 @@ exports.getAllPatients = async (req, res) => {
       patients,
     });
   } catch (error) {
-    console.error("Error retrieving patients:", error);
     return res.status(500).json({
       success: false,
       message: "Error retrieving patient details!",
@@ -103,7 +113,7 @@ exports.getSinglePatient = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server encountered a problem!",
+      message: "Server Error",
       error: error.message,
     });
   }
@@ -122,7 +132,11 @@ exports.deletePatient = async (req, res) => {
       });
     }
 
-    // Delete the patient
+    // Delete image file if it exists
+    if (patientDetail.image) {
+      fs.unlinkSync(patientDetail.image);
+    }
+
     await Patient.findByIdAndDelete(patientId);
 
     res.status(200).json({
@@ -132,7 +146,7 @@ exports.deletePatient = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server encountered a problem!",
+      message: "Server Error",
       error: error.message,
     });
   }
@@ -144,7 +158,6 @@ exports.updatePatient = async (req, res) => {
     const { id: patientId } = req.params;
     const updateData = req.body;
 
-    // Check if patient exists
     const patientDetail = await Patient.findById(patientId);
     if (!patientDetail) {
       return res.status(404).json({
@@ -153,12 +166,25 @@ exports.updatePatient = async (req, res) => {
       });
     }
 
-    // Update patient details
+    // If a new image is uploaded, update the image field and delete old image
+    if (req.file) {
+      // Delete old image file if it exists
+      if (patientDetail.image) {
+        fs.unlinkSync(patientDetail.image);
+      }
+      updateData.image = req.file.path; // Save new image path
+    }
+
     const updatedPatient = await Patient.findByIdAndUpdate(
       patientId,
       updateData,
-      { new: true, runValidators: true }
-    );
+      {
+        new: true,
+        runValidators: true,
+      }
+    )
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate("doctors");
 
     res.status(200).json({
       success: true,
@@ -168,7 +194,7 @@ exports.updatePatient = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server encountered a problem!",
+      message: "Server Error",
       error: error.message,
     });
   }

@@ -1,4 +1,5 @@
 const Auth = require("../models/authModel");
+const Patient = require("../models/patientModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -136,7 +137,11 @@ exports.getSingleUser = async (req, res) => {
       });
     }
 
-    const user = await Auth.findById(id).select("-password");
+    let user = await Auth.findById(id).select("-password");
+
+    if (!user) {
+      user = await Patient.findById(id).select("-password");
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -158,12 +163,23 @@ exports.getSingleUser = async (req, res) => {
   }
 };
 
-// Delete a user by email
+// Delete a user by ID
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await Auth.findByIdAndDelete(id);
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required to delete the user.",
+      });
+    }
+
+    let user = await Auth.findByIdAndDelete(id);
+
+    if (!user) {
+      user = await Patient.findByIdAndDelete(id);
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -191,6 +207,13 @@ exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, role } = req.body;
 
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required to update the user.",
+      });
+    }
+
     if (!name && !email && !role) {
       return res.status(400).json({
         success: false,
@@ -199,11 +222,19 @@ exports.updateUser = async (req, res) => {
       });
     }
 
-    const updatedUser = await Auth.findByIdAndUpdate(
+    let updatedUser = await Auth.findByIdAndUpdate(
       id,
       { name, email, role },
       { new: true }
     ).select("-password");
+
+    if (!updatedUser) {
+      updatedUser = await Patient.findByIdAndUpdate(
+        id,
+        { name, email, role },
+        { new: true }
+      ).select("-password");
+    }
 
     if (!updatedUser) {
       return res.status(404).json({

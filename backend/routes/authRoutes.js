@@ -26,16 +26,8 @@ router
 // - Admin can access all users, Doctor can access their own data, and Patient can access their own data
 router
   .route("/user/:id")
-  .get(
-    authMiddleware,
-    roleAuthorization(["admin", "doctor", "patient"]),
-    getSingleUser
-  ) // Admin, Doctor, and Patient can view their own profile
-  .delete(authMiddleware, roleAuthorization(["admin", "doctor"]), deleteUser) // Only Admin can delete users
-  .put(
-    authMiddleware,
-    roleAuthorization(["admin", "doctor", "patient"]),
-    updateUser
-  ); // Admin, Doctor, and Patient can update their own profile
+  .get(getSingleUser) // Admin, Doctor, and Patient can view their own profile
+  .delete(deleteUser) // Only Admin can delete users
+  .put(updateUser); // Admin, Doctor, and Patient can update their own profile
 
 module.exports = router;

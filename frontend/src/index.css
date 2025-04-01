@@ -13,7 +13,7 @@
   --widthLg: 100%;
   --widthMd: 85%;
   --widthSm: 95%;
-  --text: #212529;
+  --text: rgb(86, 86, 86);
   --text1: #009688;
   --blue: #1877f2;
   --white: #ffffff;
@@ -38,10 +38,11 @@ body {
   color: var(--text1);
   border-color: var(--text1) !important;
 }
-button:hover {
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+/* button:hover {
+  background-color: #146ee4;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
   transition: var(--transition);
-}
+} */
 .container {
   padding-left: 2rem !important;
 }

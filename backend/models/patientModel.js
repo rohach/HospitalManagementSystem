@@ -9,6 +9,10 @@ const patientSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      unique: true,
+    },
     age: {
       type: Number,
       required: true,
@@ -39,6 +43,18 @@ const patientSchema = mongoose.Schema(
         ref: "Doctor",
       },
     ],
+    image: {
+      type: String,
+      default: "",
+    },
+    role: {
+      type: String,
+      enum: ["admin", "doctor", "patient"],
+      default: "patient",
+    },
+    address: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

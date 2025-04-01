@@ -12,7 +12,7 @@ const NotFound = () => {
     },
   };
   const reload = () => {
-    window.location.reload();
+    window.location.href = "/";
   };
   return (
     <div>

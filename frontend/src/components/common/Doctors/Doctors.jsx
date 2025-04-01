@@ -5,12 +5,13 @@ import { fetchData } from "../../../utils/api";
 import Loading from "../../pages/Loading";
 import Error from "../../pages/Error";
 
-const Doctors = () => {
+const Doctors = ({ isLoggedIn, userRole, userData }) => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    console.log(userData);
     // Get All Doctors
     const getDoctors = async () => {
       try {
@@ -36,8 +37,12 @@ const Doctors = () => {
   return (
     <div className="container doctor">
       <div className="doctors_heading">
-        <h1>View All Doctors</h1>
-        <button className="add_doctor">Add Doctor</button>
+        <h2>View All Doctors</h2>
+        {userRole === 1 && (
+          <button className="add_doctor">
+            <i className="fa-solid fa-plus"> </i> &nbsp; Add Doctor
+          </button>
+        )}
       </div>
       <div className="doctors_container">
         {doctors.length > 0 ? (
@@ -46,6 +51,7 @@ const Doctors = () => {
               <img
                 src={`http://localhost:4000/${doctor.image}`}
                 alt="Doctor_Img"
+                style={{ borderRadius: "7px" }}
               />
               <p className="doc_name">Dr. {doctor.name}</p>
               <p className="doc_desc"></p>
