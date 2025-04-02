@@ -1,38 +1,47 @@
 const Ward = require("../models/wardModel");
-const Patient = require("../models/patientModel"); // Assuming you have a Patient model
+const Patient = require("../models/patientModel");
+const upload = require("../middleware/multer");
 
 // Adding a Ward
 exports.addWard = async (req, res) => {
   try {
-    const { wardName, wardType, capacity, patients } = req.body;
+    upload.single("image")(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
 
-    // Check if the ward already exists
-    const existingWard = await Ward.findOne({ wardName });
-    if (existingWard) {
-      return res.status(500).json({
-        success: false,
-        message: "Ward with this name already exists!",
+      const { wardName, wardType, capacity, patients } = req.body;
+      const imagePath = req.file ? req.file.path : null;
+
+      // Check if the ward already exists
+      const existingWard = await Ward.findOne({ wardName });
+      if (existingWard) {
+        return res.status(500).json({
+          success: false,
+          message: "Ward with this name already exists!",
+        });
+      }
+
+      // Set the number of occupied beds dynamically based on patients
+      const occupiedBeds = patients ? patients.length : 0;
+
+      // Create a new ward
+      const newWard = new Ward({
+        wardName,
+        wardType,
+        capacity,
+        occupiedBeds,
+        patients,
+        image: imagePath,
       });
-    }
 
-    // Set the number of occupied beds dynamically based on patients
-    const occupiedBeds = patients.length; // Dynamically set the occupied beds
+      await newWard.save();
 
-    // Create a new ward
-    const newWard = new Ward({
-      wardName,
-      wardType,
-      capacity,
-      occupiedBeds,
-      patients,
-    });
-
-    await newWard.save();
-
-    return res.status(201).json({
-      success: true,
-      message: "Ward Added!",
-      ward: newWard,
+      return res.status(201).json({
+        success: true,
+        message: "Ward Added!",
+        ward: newWard,
+      });
     });
   } catch (error) {
     return res.status(500).json({

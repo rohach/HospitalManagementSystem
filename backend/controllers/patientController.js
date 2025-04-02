@@ -3,6 +3,7 @@ const Doctor = require("../models/doctorModel"); // Import Doctor model
 const Ward = require("../models/wardModel");
 const fs = require("fs"); // To handle file deletion when updating or deleting patients
 const upload = require("../middleware/multer"); // Import multer middleware
+const TreatmentRecord = require("../models/treatmentRecordModel");
 
 // Register a Patient
 exports.registerPatient = async (req, res) => {
@@ -15,7 +16,7 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors, // Ensure doctors is passed as an array of doctor IDs
+      doctors,
     } = req.body;
 
     // Check if patient already exists
@@ -24,6 +25,25 @@ exports.registerPatient = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Patient with this contact number already exists!",
+      });
+    }
+
+    // Validate that 'doctors' is an array
+    if (doctors && !Array.isArray(doctors)) {
+      return res.status(400).json({
+        success: false,
+        message: "'doctors' field must be an array!",
+      });
+    }
+
+    // Validate doctor IDs before proceeding
+    if (
+      doctors &&
+      doctors.some((doctorId) => !mongoose.Types.ObjectId.isValid(doctorId))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "One or more doctor IDs are invalid!",
       });
     }
 
@@ -42,14 +62,14 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors, // Add the doctors to the patient object (must be an array of doctor ObjectIds)
+      doctors, // Add the doctors to the patient object (must be an array of ObjectIds)
       image: imageUrl, // Save image path in DB
     });
 
     // Save the patient to the database
     await newPatient.save();
 
-    // After saving the patient, increment the occupiedBeds count of the ward and add patient to ward's patients array
+    // After saving the patient, update the ward and add patient to doctor's patient list
     const updatedWard = await Ward.findByIdAndUpdate(
       ward,
       {
@@ -59,13 +79,25 @@ exports.registerPatient = async (req, res) => {
       { new: true }
     ).populate("patients");
 
-    // Update each doctor associated with the patient to include the patient's ID in their list of patients
+    // Update the doctor with the patient's ID
     if (doctors && doctors.length > 0) {
       await Doctor.updateMany(
         { _id: { $in: doctors } }, // Find doctors whose IDs are in the doctors array
         { $push: { patients: newPatient._id } } // Add the patient's ID to the doctor's patients array
       );
     }
+
+    // Create a new treatment record for the patient
+    const newTreatmentRecord = new TreatmentRecord({
+      patientId: newPatient._id,
+      doctorId: doctors[0], // Assuming the first doctor in the list is the primary doctor
+      wardId: ward, // Assign ward to the treatment record
+      treatmentDetails: "Initial treatment details for patient", // Add the initial treatment details here
+      admissionDate: new Date(),
+    });
+
+    // Save the treatment record
+    await newTreatmentRecord.save();
 
     // Populate patient with ward and doctor details
     const populatedPatient = await Patient.findById(newPatient._id)

@@ -5,6 +5,7 @@ import NotFound from "./components/pages/NotFound";
 import "./layout.css";
 import Doctors from "./components/common/Doctors/Doctors";
 import Patients from "./components/common/Patients/Patients";
+import Wards from "./components/common/Wards/Wards";
 
 const Layout = ({ isLoggedIn, userRole, userData }) => {
   return (
@@ -27,6 +28,16 @@ const Layout = ({ isLoggedIn, userRole, userData }) => {
             path="patients"
             element={
               <Patients
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                userData={userData}
+              />
+            }
+          />
+          <Route
+            path="wards"
+            element={
+              <Wards
                 isLoggedIn={isLoggedIn}
                 userRole={userRole}
                 userData={userData}

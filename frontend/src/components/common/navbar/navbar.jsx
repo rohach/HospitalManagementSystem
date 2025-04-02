@@ -55,13 +55,6 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
                   {(userRole === 1 || userRole === 0) && (
                     <>
                       <li className="item">
-                        <a href="#">
-                          <i className="fa-solid fa-calendar-days"></i>
-                          <span className="item-text">Appointments</span>
-                          <span className="item-tooltip">Appointments</span>
-                        </a>
-                      </li>
-                      <li className="item">
                         <Link to="doctors">
                           <i className="fa-solid fa-user-doctor"></i>
                           <span className="item-text">Doctors</span>
@@ -76,24 +69,17 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
                         </Link>
                       </li>
                       <li className="item">
-                        <a href="#">
+                        <Link to="wards">
                           <i className="fa-solid fa-bed"></i>
                           <span className="item-text">Wards</span>
                           <span className="item-tooltip">Wards</span>
-                        </a>
+                        </Link>
                       </li>
                       <li className="item">
                         <a href="#">
                           <i className="fa-solid fa-file-medical"></i>
                           <span className="item-text">Records</span>
                           <span className="item-tooltip">Records</span>
-                        </a>
-                      </li>
-                      <li className="item">
-                        <a href="#">
-                          <i className="fa-solid fa-clipboard"></i>
-                          <span className="item-text">Treatments</span>
-                          <span className="item-tooltip">Treatments</span>
                         </a>
                       </li>
                     </>
@@ -115,7 +101,7 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
                         </Link>
                       </li>
                       <li className="item">
-                        <Link to="doctors">
+                        <Link to="wards">
                           <i className="fa-solid fa-user-doctor"></i>
                           <span className="item-text">Ward</span>
                           <span className="item-tooltip">Ward</span>

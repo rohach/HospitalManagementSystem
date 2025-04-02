@@ -26,6 +26,9 @@ const wardSchema = new mongoose.Schema(
         ref: "Patient",
       },
     ],
+    image: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

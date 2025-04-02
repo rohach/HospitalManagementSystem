@@ -1,28 +1,30 @@
 const mongoose = require("mongoose");
 
-const treatmentSchema = new mongoose.Schema(
-  {
-    patientId: {
-      type: String,
-      required: true,
-    },
-    doctorId: {
-      type: String,
-      required: true,
-    },
-    date: {
-      type: Date,
-      default: Date.now,
-    },
-    treatments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Treatment",
-      },
-    ],
+const treatmentRecordSchema = new mongoose.Schema({
+  patientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient",
+    required: true,
   },
-  { timestamps: true }
-);
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doctor",
+    required: true,
+  },
+  wardId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ward",
+    required: false,
+  }, // If applicable
+  admissionDate: { type: Date, default: Date.now },
+  dischargeDate: { type: Date },
+  transferred: { type: Boolean, default: false },
+  treatmentDetails: { type: String },
+  notes: { type: String },
+});
 
-const treatmentModel = mongoose.model("Treatment", treatmentSchema);
-module.exports = treatmentModel;
+const TreatmentRecord = mongoose.model(
+  "TreatmentRecord",
+  treatmentRecordSchema
+);
+module.exports = TreatmentRecord;

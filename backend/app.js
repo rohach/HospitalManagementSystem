@@ -7,6 +7,7 @@ const doctorRoutes = require("./routes/doctorRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const wardRoutes = require("./routes/wardRoutes");
 const authRoutes = require("./routes/authRoutes");
+const treatmentRecordRoutes = require("./routes/treatmentRecordRoutes");
 const path = require("path");
 const cors = require("cors");
 
@@ -27,6 +28,7 @@ app.use("/api/v1/doctor", doctorRoutes);
 app.use("/api/v1/team", teamRoutes);
 app.use("/api/v1/ward", wardRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/treatmentRecord", treatmentRecordRoutes);
 
 app.listen(PORT, () => {
   try {

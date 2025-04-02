@@ -24,8 +24,8 @@
   gap: 1rem;
 }
 .doctors_div {
-  height: 400px; /* Set a fixed height */
-  width: 23%; /* Maintain the width as is */
+  height: 450px;
+  width: 23%;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 10px;
   padding: 1rem 2rem;
