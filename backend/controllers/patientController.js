@@ -4,6 +4,7 @@ const Ward = require("../models/wardModel");
 const fs = require("fs"); // To handle file deletion when updating or deleting patients
 const upload = require("../middleware/multer"); // Import multer middleware
 const TreatmentRecord = require("../models/treatmentRecordModel");
+const mongoose = require("mongoose");
 
 // Register a Patient
 exports.registerPatient = async (req, res) => {
@@ -16,7 +17,7 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors,
+      doctors, // Array of doctor IDs
     } = req.body;
 
     // Check if patient already exists
@@ -28,7 +29,7 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // Validate that 'doctors' is an array
+    // Validate doctors input is an array and valid ObjectId
     if (doctors && !Array.isArray(doctors)) {
       return res.status(400).json({
         success: false,
@@ -36,7 +37,6 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // Validate doctor IDs before proceeding
     if (
       doctors &&
       doctors.some((doctorId) => !mongoose.Types.ObjectId.isValid(doctorId))
@@ -47,13 +47,13 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // If there's an image uploaded, handle file saving
+    // Handle patient image upload
     let imageUrl = "";
     if (req.file) {
-      imageUrl = req.file.path; // Save the file path in the DB
+      imageUrl = req.file.path;
     }
 
-    // Create a new patient
+    // Create new patient instance
     const newPatient = new Patient({
       patientName,
       patientCaste,
@@ -62,53 +62,54 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors, // Add the doctors to the patient object (must be an array of ObjectIds)
-      image: imageUrl, // Save image path in DB
+      doctors, // Attach doctors to the patient
+      image: imageUrl,
     });
 
-    // Save the patient to the database
+    // Save the patient
     await newPatient.save();
 
-    // After saving the patient, update the ward and add patient to doctor's patient list
+    // Update the ward
     const updatedWard = await Ward.findByIdAndUpdate(
       ward,
       {
-        $inc: { occupiedBeds: 1 }, // Increment the occupiedBeds by 1
-        $push: { patients: newPatient._id }, // Push the new patient's ID into the patients array
+        $inc: { occupiedBeds: 1 },
+        $push: { patients: newPatient._id },
       },
       { new: true }
     ).populate("patients");
 
-    // Update the doctor with the patient's ID
+    // Update the doctors' treatedPatients array to include the new patient
     if (doctors && doctors.length > 0) {
       await Doctor.updateMany(
-        { _id: { $in: doctors } }, // Find doctors whose IDs are in the doctors array
-        { $push: { patients: newPatient._id } } // Add the patient's ID to the doctor's patients array
+        { _id: { $in: doctors } },
+        { $push: { treatedPatients: newPatient._id } }
       );
     }
 
-    // Create a new treatment record for the patient
+    // Create a treatment record for the patient
     const newTreatmentRecord = new TreatmentRecord({
       patientId: newPatient._id,
-      doctorId: doctors[0], // Assuming the first doctor in the list is the primary doctor
-      wardId: ward, // Assign ward to the treatment record
-      treatmentDetails: "Initial treatment details for patient", // Add the initial treatment details here
+      doctorId: doctors[0], // Assuming the first doctor is the primary doctor
+      wardId: ward,
+      treatmentDetails: "Initial treatment details for patient",
       admissionDate: new Date(),
     });
 
     // Save the treatment record
     await newTreatmentRecord.save();
 
-    // Populate patient with ward and doctor details
+    // Populate patient with ward and doctors details
     const populatedPatient = await Patient.findById(newPatient._id)
       .populate("ward")
       .populate("doctors");
 
+    // Return success response
     return res.status(201).json({
       success: true,
       message: "Patient registered successfully!",
       patient: populatedPatient,
-      ward: updatedWard, // Return the updated ward with the new patient included
+      ward: updatedWard, // Return updated ward info
     });
   } catch (error) {
     return res.status(500).json({
@@ -208,13 +209,15 @@ exports.deletePatient = async (req, res) => {
   }
 };
 
-// Update Single Patient
 exports.updatePatient = async (req, res) => {
   try {
     const { id: patientId } = req.params;
     const updateData = req.body;
 
+    // Get existing patient details
     const patientDetail = await Patient.findById(patientId);
+
+    // If patient not found, return an error
     if (!patientDetail) {
       return res.status(404).json({
         success: false,
@@ -222,33 +225,36 @@ exports.updatePatient = async (req, res) => {
       });
     }
 
-    // If a new image is uploaded, update the image field and delete old image
-    if (req.file) {
-      // Delete old image file if it exists
-      if (patientDetail.image) {
-        fs.unlinkSync(patientDetail.image);
-      }
-      updateData.image = req.file.path; // Save new image path
+    // Ensure the contact number is not updated
+    if (updateData.contact) {
+      delete updateData.contact; // Remove the contact field from updateData if present
     }
 
+    // Ensure the doctor field is an array (for multiple doctors)
+    if (updateData.doctor && !Array.isArray(updateData.doctor)) {
+      updateData.doctor = [updateData.doctor]; // Ensure doctor is an array of _id
+    }
+
+    // Update the patient details
     const updatedPatient = await Patient.findByIdAndUpdate(
       patientId,
       updateData,
       {
-        new: true,
-        runValidators: true,
+        new: true, // Ensure we get the updated patient document
+        runValidators: true, // Run the model's validation checks
       }
     )
       .populate({ path: "ward", select: "wardName _id" })
       .populate("doctors");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Patient updated successfully!",
       patient: updatedPatient,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error); // Add logging for easier debugging
+    return res.status(500).json({
       success: false,
       message: "Server Error",
       error: error.message,

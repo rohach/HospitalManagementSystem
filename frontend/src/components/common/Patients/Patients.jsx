@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./patient.css";
-import { deleteData, fetchData, postData } from "../../../utils/api";
+import {
+  deleteData,
+  fetchData,
+  postData,
+  updateData,
+} from "../../../utils/api";
 import Error from "../../pages/Error";
 import Loading from "../../pages/Loading";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage";
@@ -12,6 +17,8 @@ const Patients = ({ userRole, userData }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [patientData, setPatientData] = useState({
     patientName: "",
     patientCaste: "",
@@ -20,80 +27,152 @@ const Patients = ({ userRole, userData }) => {
     address: "",
     gender: "",
     status: "",
+    ward: "",
+    doctors: [],
+    age: "",
   });
+  const [wards, setWards] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [selectedWard, setSelectedWard] = useState("");
+  const [selectedDoctors, setSelectedDoctors] = useState([]);
 
   useEffect(() => {
-    const getPatients = async () => {
+    const fetchAllData = async () => {
       try {
-        const data = await fetchData("patient/getAllPatients");
-        setPatients(data.patients);
-        setPatientCount(data.patients.length);
+        const [patientsRes, wardsRes, doctorsRes] = await Promise.all([
+          fetchData("patient/getAllPatients"),
+          fetchData("ward/getAllWards"),
+          fetchData("doctor/getAllDoctors"),
+        ]);
+        setPatients(patientsRes.patients);
+        setPatientCount(patientsRes.patients.length);
+        setWards(wardsRes.wards);
+        setDoctors(doctorsRes.doctors);
       } catch (error) {
         setError(true);
       } finally {
         setLoading(false);
       }
     };
-    getPatients();
+    fetchAllData();
   }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPatientData({ ...patientData, [name]: value });
+    setPatientData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const addPatient = async (e) => {
+  const handleWardChange = (e) => {
+    const { value } = e.target;
+    setSelectedWard(value);
+    setPatientData((prev) => ({ ...prev, ward: value }));
+  };
+
+  const handleDoctorChange = (e) => {
+    const { value, checked } = e.target;
+    setSelectedDoctors((prev) =>
+      checked ? [...prev, value] : prev.filter((id) => id !== value)
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const dataToSend = { ...patientData, doctors: selectedDoctors };
     try {
-      const response = await postData("patient/registerPatient", patientData);
-      notify(response?.message, "success");
-      setPatients([...patients, response.patient]);
-      setPatientCount(patientCount + 1);
-      setOpenPopup(false);
+      let response;
+      if (editing) {
+        response = await updateData(
+          `patient/getSinglePatient/${editId}`,
+          dataToSend
+        );
+        notify("Patient updated successfully!", "success");
+        setPatients((prev) =>
+          prev.map((p) =>
+            p._id === editId ? { ...p, ...response.patient } : p
+          )
+        );
+      } else {
+        response = await postData("patient/registerPatient", dataToSend);
+        notify(response?.message, "success");
+        setPatients((prev) => [...prev, response.patient]);
+        setPatientCount((count) => count + 1);
+      }
+      resetForm();
     } catch (error) {
-      notify(error.response?.data?.message || "Failed to add patient", "error");
+      notify(error.response?.data?.message || "Operation failed", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const deletePatient = async (patientId) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this patient?"
-    );
-    if (!isConfirmed) return;
+  const handleEdit = (patient) => {
+    setEditing(true);
+    setEditId(patient._id);
+    setOpenPopup(true);
+    setSelectedDoctors(patient.doctors.map((doc) => doc._id));
+    setSelectedWard(patient.ward?._id || "");
+    setPatientData({
+      patientName: patient.patientName,
+      patientCaste: patient.patientCaste,
+      contact: patient.contact,
+      email: patient.email,
+      address: patient.address,
+      gender: patient.gender,
+      status: patient.status,
+      ward: patient.ward?._id || "",
+      doctors: patient.doctors.map((doc) => doc._id),
+      age: patient.age,
+    });
+  };
 
+  const deletePatient = async (patientId) => {
+    if (!window.confirm("Are you sure you want to delete this patient?"))
+      return;
     setLoading(true);
     try {
-      const response = await deleteData(
-        `patient/getSinglePatient/${patientId}`
-      );
-      console.log("Patient deleted successfully!", response);
-
-      setPatients((prevPatients) =>
-        prevPatients.filter((patient) => patient._id !== patientId)
-      );
-      setPatientCount((prevCount) => prevCount - 1);
+      await deleteData(`patient/getSinglePatient/${patientId}`);
+      setPatients((prev) => prev.filter((p) => p._id !== patientId));
+      setPatientCount((count) => count - 1);
+      notify("Patient deleted successfully", "success");
     } catch (error) {
-      console.error("Failed to delete patient:", error.message);
+      notify("Failed to delete patient", "error");
       setError(true);
     } finally {
       setLoading(false);
     }
   };
-  // Function to format date
+
+  const resetForm = () => {
+    setOpenPopup(false);
+    setEditing(false);
+    setEditId(null);
+    setSelectedDoctors([]);
+    setSelectedWard("");
+    setPatientData({
+      patientName: "",
+      patientCaste: "",
+      contact: "",
+      email: "",
+      address: "",
+      gender: "",
+      status: "",
+      ward: "",
+      doctors: [],
+      age: "",
+    });
+  };
+
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A"; // Handle undefined/null values
-
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "N/A"; // Ensure it's a valid date
-
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(date);
+    return isNaN(date.getTime())
+      ? "N/A"
+      : new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(date);
   };
 
   if (loading) return <Loading />;
@@ -103,119 +182,135 @@ const Patients = ({ userRole, userData }) => {
     <>
       <ToastifyComponent />
       {(userRole === 1 || userRole === 0) && (
-        <>
-          <div className="container patient">
-            <div className="doctors_heading">
-              <h2>View All Patients</h2>
-              {userRole === 1 && (
-                <button
-                  className="add_doctor"
-                  onClick={() => setOpenPopup(true)}
-                >
-                  <i className="fa-solid fa-plus"></i> &nbsp; Add Patient
-                </button>
-              )}
-            </div>
-
-            {!openPopup && (
-              <div className="patient_container">
-                <table id="customers">
-                  <thead>
-                    <tr>
-                      <th>Image</th>
-                      <th>Name</th>
-                      <th>Admitted Date</th>
-                      <th>Gender</th>
-                      <th>Age</th>
-                      <th>Doctor</th>
-                      <th>Ward</th>
-                      <th>Contact</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {patients.length > 0 ? (
-                      patients.map((patient) => (
-                        <tr key={patient._id}>
-                          <td>
-                            <img
-                              src={
-                                patient?.image
-                                  ? `http://localhost:4000/${patient.image}`
-                                  : defaultImage
-                              }
-                              alt="Patient_Img"
-                              className="patient_image"
-                            />
-                          </td>
-                          <td>
-                            {patient.patientName} {patient.patientCaste}
-                          </td>
-                          <td>{formatDate(patient.createdAt)}</td>
-                          <td>{patient.gender}</td>
-                          <td>{patient.age}</td>
-                          <td>
-                            {patient.doctors?.length > 0
-                              ? patient.doctors.map((doctor, index) => (
-                                  <span key={doctor._id}>
-                                    {doctor.name}
-                                    {index < patient.doctors.length - 1 && ", "}
-                                  </span>
-                                ))
-                              : "N/A"}
-                          </td>
-                          <td>{patient.ward?.wardName || "N/A"}</td>
-                          <td>{patient.contact}</td>
-                          <td>{patient.status}</td>
-                          <td className="action_button_div">
-                            <button className="action_button">
-                              <i className="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button
-                              className="action_button"
-                              onClick={() => deletePatient(patient._id)}
-                            >
-                              <i className="fa-solid fa-trash-can"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="10"
-                          style={{
-                            textAlign: "center",
-                            padding: "10px",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          No patient data found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+        <div className="container patient">
+          <div className="doctors_heading">
+            <h2>View All Patients</h2>
+            {userRole === 1 && (
+              <button
+                className="add_doctor"
+                onClick={() => {
+                  setOpenPopup(true);
+                  setEditing(false);
+                  setSelectedDoctors([]);
+                  setSelectedWard("");
+                  setPatientData({
+                    patientName: "",
+                    patientCaste: "",
+                    contact: "",
+                    email: "",
+                    address: "",
+                    gender: "",
+                    status: "",
+                    ward: "",
+                    doctors: [],
+                    age: "",
+                  });
+                }}
+              >
+                <i className="fa-solid fa-plus"></i>&nbsp; Add Patient
+              </button>
             )}
           </div>
-
+          {!openPopup && (
+            <div className="patient_container">
+              <table id="customers">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Admitted Date</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Doctor</th>
+                    <th>Ward</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {patients.length > 0 ? (
+                    patients.map((patient) => (
+                      <tr key={patient._id}>
+                        <td>
+                          <img
+                            src={
+                              patient?.image
+                                ? `http://localhost:4000/${patient.image}`
+                                : defaultImage
+                            }
+                            alt="Patient_Img"
+                            className="patient_image"
+                          />
+                        </td>
+                        <td>
+                          {patient.patientName} {patient.patientCaste}
+                        </td>
+                        <td>{formatDate(patient.createdAt)}</td>
+                        <td>{patient.gender}</td>
+                        <td>{patient.age}</td>
+                        <td>
+                          {patient.doctors?.length
+                            ? patient.doctors.map((doc, i) => (
+                                <span key={doc._id}>
+                                  {doc.name}
+                                  {i < patient.doctors.length - 1 && ", "}
+                                </span>
+                              ))
+                            : "N/A"}
+                        </td>
+                        <td>{patient.ward?.wardName || "N/A"}</td>
+                        <td>{patient.contact}</td>
+                        <td>{patient.status}</td>
+                        <td className="action_button_div">
+                          <button
+                            className="action_button"
+                            onClick={() => handleEdit(patient)}
+                          >
+                            <i className="fa-solid fa-pen-to-square"></i>
+                          </button>
+                          <button
+                            className="action_button"
+                            onClick={() => deletePatient(patient._id)}
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="10"
+                        style={{
+                          textAlign: "center",
+                          padding: "10px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        No patient data found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
           {openPopup && (
             <div className="popup">
               <div className="ppcontainer">
                 <div className="form-part">
                   <div className="form_title">
-                    <h2>Add Patient</h2>
+                    <h2>{editing ? "Update Patient" : "Add Patient"}</h2>
                     <i
                       className="fa-solid fa-xmark"
                       style={{ cursor: "pointer" }}
                       onClick={() => setOpenPopup(false)}
                     ></i>
                   </div>
-                  <form className="form-inputs" onSubmit={addPatient}>
+                  <form className="form-inputs" onSubmit={handleSubmit}>
                     <div className="text-input">
-                      <label htmlFor="patientName">First Name</label>
+                      <label>First Name</label>
                       <input
                         type="text"
                         name="patientName"
@@ -225,7 +320,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="patientCaste">Last Name</label>
+                      <label>Last Name</label>
                       <input
                         type="text"
                         name="patientCaste"
@@ -235,7 +330,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="contact">Mobile/Landline</label>
+                      <label>Mobile/Landline</label>
                       <input
                         type="text"
                         name="contact"
@@ -245,7 +340,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="email">Email</label>
+                      <label>Email</label>
                       <input
                         type="email"
                         name="email"
@@ -255,7 +350,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="address">Address</label>
+                      <label>Address</label>
                       <input
                         type="text"
                         name="address"
@@ -265,7 +360,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="age">Age</label>
+                      <label>Age</label>
                       <input
                         type="text"
                         name="age"
@@ -275,7 +370,7 @@ const Patients = ({ userRole, userData }) => {
                       />
                     </div>
                     <div className="text-input">
-                      <label htmlFor="gender">Gender</label>
+                      <label>Gender</label>
                       <select
                         name="gender"
                         value={patientData.gender}
@@ -289,7 +384,44 @@ const Patients = ({ userRole, userData }) => {
                       </select>
                     </div>
                     <div className="text-input">
-                      <label htmlFor="status">Status</label>
+                      <label>Ward</label>
+                      <select
+                        name="ward"
+                        value={selectedWard}
+                        onChange={handleWardChange}
+                        required
+                      >
+                        <option value="">Select Ward</option>
+                        {wards.map((ward) => (
+                          <option key={ward._id} value={ward._id}>
+                            {ward.wardName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <fieldset className="doctor-selection">
+                      <legend>Select Assigned Doctors</legend>
+                      <div className="doctor-checkbox-group">
+                        {doctors.map((doctor) => (
+                          <div
+                            key={doctor._id}
+                            className="doctor-checkbox-item"
+                          >
+                            <input
+                              type="checkbox"
+                              id={doctor._id}
+                              value={doctor._id}
+                              checked={selectedDoctors.includes(doctor._id)}
+                              onChange={handleDoctorChange}
+                            />
+                            <label htmlFor={doctor._id}>{doctor.name}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    <div className="text-input">
+                      <label>Patient Status</label>
                       <select
                         name="status"
                         value={patientData.status}
@@ -301,105 +433,18 @@ const Patients = ({ userRole, userData }) => {
                         <option value="Discharged">Discharged</option>
                       </select>
                     </div>
-                    <div className="text-input">
-                      <label htmlFor="ward">Ward</label>
-                      <input
-                        type="text"
-                        name="ward"
-                        value={patientData.ward}
-                        onChange={handleInputChange}
-                        required
-                      />
+
+                    <div className="submit-btn">
+                      <button type="submit" className="btn">
+                        {editing ? "Update Patient" : "Add Patient"}
+                      </button>
                     </div>
-                    <button
-                      className="add_doctor"
-                      type="submit"
-                      style={{ width: "100%" }}
-                    >
-                      Submit
-                    </button>
                   </form>
                 </div>
               </div>
             </div>
           )}
-        </>
-      )}
-      {userRole === -1 && (
-        <>
-          <div className="container patient">
-            <div className="patient_div">
-              <div className="patient_profile">
-                <img
-                  src={
-                    userData?.image
-                      ? `http://localhost:4000/${userData.image}`
-                      : defaultImage
-                  }
-                  alt="Patient_Img"
-                  className="patient_img"
-                />
-                <p className="patient_name">
-                  {userData?.name || userData?.patientName}{" "}
-                  {userData?.patientCaste || ""}
-                </p>
-
-                <p className="email">{userData?.email || "abcd@gmail.com"}</p>
-                <button
-                  className="delete_profile"
-                  onClick={() => deletePatient(userData?._id)}
-                >
-                  Delete Profile
-                </button>
-              </div>
-              <div className="patient_info">
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Age</p>
-                  <p className="patient_info_div_info">
-                    {userData?.age || "N/A"}
-                  </p>
-                </div>
-
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Contact</p>
-                  <p className="patient_info_div_info">
-                    {userData?.gender || "N/A"}
-                  </p>
-                </div>
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Status</p>
-                  <p className="patient_info_div_info">
-                    {userData?.status || "N/A"}
-                  </p>
-                </div>
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Ward</p>
-                  <p className="patient_info_div_info">
-                    {userData?.ward || "N/A"}
-                  </p>
-                </div>
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Sex</p>
-                  <p className="patient_info_div_info">
-                    {userData?.gender || "N/A"}
-                  </p>
-                </div>
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Blood Group</p>
-                  <p className="patient_info_div_info">
-                    {userData?.blood || "N/A"}
-                  </p>
-                </div>
-                <div className="patient_info_div">
-                  <p className="patient_info_div_title">Admitted At</p>
-                  <p className="patient_info_div_info">
-                    {formatDate(userData?.createdAt)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </>
   );

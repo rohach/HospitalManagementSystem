@@ -54,3 +54,19 @@ export const postData = async (endpoint, body, headers = {}) => {
     throw error;
   }
 };
+
+export const updateData = async (endpoint, data) => {
+  const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update data");
+  }
+
+  return await response.json();
+};

@@ -12,13 +12,11 @@ const Wards = ({ userRole }) => {
   const [error, setError] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
   const [wardData, setWardData] = useState({
-    name: "",
-    type: "",
+    wardName: "",
+    wardType: "",
     capacity: "",
-    location: "",
   });
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const wardsPerPage = 8;
 
@@ -45,10 +43,11 @@ const Wards = ({ userRole }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await postData("ward/registerWard", wardData);
+      const response = await postData("ward/addWard", wardData);
       notify(response?.message, "success");
       setWards([...wards, response.ward]);
       setOpenPopup(false);
+      setWardData({ wardName: "", wardType: "", capacity: "" });
     } catch (error) {
       notify(error.response?.data?.message || "Failed to add ward", "error");
     } finally {
@@ -73,7 +72,6 @@ const Wards = ({ userRole }) => {
     }
   };
 
-  // Pagination Logic
   const indexOfLastWard = currentPage * wardsPerPage;
   const indexOfFirstWard = indexOfLastWard - wardsPerPage;
   const currentWards = wards.slice(indexOfFirstWard, indexOfLastWard);
@@ -105,16 +103,7 @@ const Wards = ({ userRole }) => {
           <div className="doctors_container">
             {currentWards.length > 0 ? (
               currentWards.map((ward) => (
-                <div className="doctors_div" key={ward._id}>
-                  <img
-                    src={
-                      ward?.image
-                        ? `http://localhost:4000/${ward.image}`
-                        : defaultImage
-                    }
-                    alt="Ward_Img"
-                    style={{ borderRadius: "7px" }}
-                  />
+                <div className="doctors_div ward_div" key={ward._id}>
                   <p className="doc_name">{ward.wardName}</p>
                   <p className="grade">Type: {ward.wardType}</p>
                   <p className="grade">Capacity: {ward.capacity}</p>
@@ -132,7 +121,6 @@ const Wards = ({ userRole }) => {
             )}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <ul id="pagination">
               <li>
@@ -183,41 +171,37 @@ const Wards = ({ userRole }) => {
               </div>
               <form className="form-inputs" onSubmit={addWard}>
                 <div className="text-input">
-                  <label htmlFor="name">Name</label>
+                  <label htmlFor="wardName">Ward Name</label>
                   <input
                     type="text"
-                    name="name"
-                    value={wardData.name}
+                    name="wardName"
+                    value={wardData.wardName}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
                 <div className="text-input">
-                  <label htmlFor="type">Type</label>
-                  <input
-                    type="text"
-                    name="type"
-                    value={wardData.type}
+                  <label htmlFor="wardType">Ward Type</label>
+                  <select
+                    name="wardType"
+                    value={wardData.wardType}
                     onChange={handleInputChange}
                     required
-                  />
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Kids">Kids</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
                 <div className="text-input">
                   <label htmlFor="capacity">Capacity</label>
                   <input
                     type="number"
                     name="capacity"
+                    min="1"
                     value={wardData.capacity}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="text-input">
-                  <label htmlFor="location">Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={wardData.location}
                     onChange={handleInputChange}
                     required
                   />

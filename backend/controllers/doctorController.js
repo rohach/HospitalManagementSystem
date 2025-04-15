@@ -1,17 +1,31 @@
 const Doctor = require("../models/doctorModel");
 const Patient = require("../models/patientModel");
 const Ward = require("../models/wardModel");
-const upload = require("../middleware/multer"); // Import multer middleware
-const fs = require("fs"); // To handle file deletion when updating or deleting doctors
+const upload = require("../middleware/multer");
+const fs = require("fs");
 
+// Register a Doctor
+// Register a Doctor
 // Register a Doctor
 exports.registerDoctor = async (req, res) => {
   try {
-    const { name, grade, team, treatedPatients, juniorDoctors, wardId } =
-      req.body;
+    const {
+      name,
+      grade,
+      team,
+      treatedPatients,
+      juniorDoctors,
+      wardId,
+      specialty,
+      contact,
+      email,
+    } = req.body;
 
-    // Check if doctor already exists
-    const doctorExists = await Doctor.findOne({ name, team });
+    // If team is empty or invalid, set it to null
+    const teamId = team && team !== "" ? team : null;
+
+    // Check if a doctor with the same name and team already exists
+    const doctorExists = await Doctor.findOne({ name, team: teamId });
     if (doctorExists) {
       return res.status(400).json({
         success: false,
@@ -19,57 +33,56 @@ exports.registerDoctor = async (req, res) => {
       });
     }
 
-    // If there's an image uploaded, handle file saving
     let imageUrl = "";
     if (req.file) {
-      imageUrl = req.file.path; // Save the file path in the DB
+      imageUrl = req.file.path;
     }
 
-    // Ensure treatedPatients and juniorDoctors are arrays
+    // Create a new doctor
     const newDoctor = new Doctor({
       name,
       grade,
-      team,
+      team: teamId, // Use the validated teamId
+      specialty,
+      contact,
+      email,
       treatedPatients: Array.isArray(treatedPatients)
         ? treatedPatients
-        : [treatedPatients],
+        : treatedPatients
+        ? [treatedPatients]
+        : [],
       juniorDoctors: Array.isArray(juniorDoctors)
         ? juniorDoctors
-        : [juniorDoctors],
-      image: imageUrl, // Save image path in DB
+        : juniorDoctors
+        ? [juniorDoctors]
+        : [],
+      image: imageUrl,
     });
 
-    // Check if the wardId is provided and the ward exists
+    // Add doctor to the ward if wardId is provided
     if (wardId) {
-      const ward = await Ward.findById(wardId); // Find ward by ID
+      const ward = await Ward.findById(wardId);
       if (!ward) {
         return res.status(400).json({
           success: false,
           message: "Ward not found with the provided ID!",
         });
       }
-      // If ward is found, add doctor to the ward's doctors array
-      if (!ward.doctors) ward.doctors = []; // Ensure doctors array exists
+      if (!ward.doctors) ward.doctors = [];
       ward.doctors.push(newDoctor._id);
-
-      // Add the ward to the new doctor's wards array
       newDoctor.wards.push(ward._id);
-
-      // Save the updated ward and the new doctor
       await ward.save();
     }
 
-    // Save the doctor to the database
     await newDoctor.save();
 
-    // Return success response with full doctor and populated ward details
     return res.status(201).json({
       success: true,
       message: "Doctor registered successfully!",
       doctor: newDoctor,
     });
   } catch (error) {
-    console.error("Error:", error); // Log the error for debugging
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -82,23 +95,18 @@ exports.registerDoctor = async (req, res) => {
 exports.getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find()
-      .populate("treatedPatients", "patientName age")
-      .populate("juniorDoctors", "name grade")
-      .populate("wards", "wardName occupiedBeds");
+      .populate("wards") // Populate assigned wards
+      .populate("treatedPatients"); // Populate treated patients
 
     res.status(200).json({
       success: true,
-      message:
-        doctors.length > 0
-          ? "Doctors Retrieved successfully!"
-          : "No doctors found!",
+      message: "Doctors Retrieved successfully!",
       doctors,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server Error",
-      error: error.message,
+      message: error.message,
     });
   }
 };
@@ -113,22 +121,16 @@ exports.getSingleDoctor = async (req, res) => {
       .populate("wards", "wardName");
 
     if (!doctorDetail) {
-      return res.status(500).json({
-        success: false,
-        message: "Doctor not found!",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found!" });
     }
 
-    res.status(200).json({
-      success: true,
-      doctorDetail,
-    });
+    res.status(200).json({ success: true, doctorDetail });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
@@ -136,39 +138,34 @@ exports.getSingleDoctor = async (req, res) => {
 exports.deleteDoctor = async (req, res) => {
   try {
     const { id: doctorId } = req.params;
-
     const doctorDetail = await Doctor.findById(doctorId);
+
     if (!doctorDetail) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found!",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found!" });
     }
 
-    // Remove the doctor from associated wards
     await Ward.updateMany(
       { doctors: doctorId },
       { $pull: { doctors: doctorId } }
     );
 
-    // Delete image file if it exists
     if (doctorDetail.image) {
-      fs.unlinkSync(doctorDetail.image);
+      fs.unlink(doctorDetail.image, (err) => {
+        if (err) console.error("Failed to delete image:", err);
+      });
     }
 
-    // Delete the doctor
     await Doctor.findByIdAndDelete(doctorId);
 
-    res.status(200).json({
-      success: true,
-      message: "Doctor deleted successfully!",
-    });
+    res
+      .status(200)
+      .json({ success: true, message: "Doctor deleted successfully!" });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
@@ -180,19 +177,18 @@ exports.updateDoctor = async (req, res) => {
 
     const doctorDetail = await Doctor.findById(doctorId);
     if (!doctorDetail) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found!",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found!" });
     }
 
-    // If a new image is uploaded, update the image field and delete old image
     if (req.file) {
-      // Delete old image file if it exists
       if (doctorDetail.image) {
-        fs.unlinkSync(doctorDetail.image);
+        fs.unlink(doctorDetail.image, (err) => {
+          if (err) console.error("Failed to delete old image:", err);
+        });
       }
-      updateData.image = req.file.path; // Save new image path
+      updateData.image = req.file.path;
     }
 
     const updatedDoctor = await Doctor.findByIdAndUpdate(doctorId, updateData, {
@@ -209,18 +205,16 @@ exports.updateDoctor = async (req, res) => {
       doctor: updatedDoctor,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
 // Add Treated Patient to Doctor
 exports.addTreatedPatient = async (req, res) => {
   try {
-    const { doctorId } = req.params; // Updated to fetch doctorId from params
+    const { doctorId } = req.params;
     const { patientId } = req.body;
 
     const doctor = await Doctor.findByIdAndUpdate(
@@ -232,14 +226,12 @@ exports.addTreatedPatient = async (req, res) => {
       .populate("juniorDoctors", "name grade");
 
     if (!doctor) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found!",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found!" });
     }
 
-    // Update the patient and add the doctor to their treatedBy array (or similar array)
-    const patient = await Patient.findByIdAndUpdate(patientId, {
+    await Patient.findByIdAndUpdate(patientId, {
       $addToSet: { treatedBy: doctorId },
     });
 
@@ -247,16 +239,13 @@ exports.addTreatedPatient = async (req, res) => {
       success: true,
       message: "Patient added to treated list successfully!",
       doctor,
-      patient,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
-// Define Multer upload middleware for image file upload (for doctor registration and update)
-exports.uploadDoctorImage = upload.single("image"); // 'image' is the fieldname in the form
+// Define Multer upload middleware
+exports.uploadDoctorImage = upload.single("image");

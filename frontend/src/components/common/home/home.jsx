@@ -7,9 +7,9 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
   const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [patientCount, setPatientCount] = useState(0);
   const [doctorCount, setDoctorCount] = useState(0);
-  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -83,6 +83,12 @@ const Home = () => {
     });
   };
 
+  // Function to get the doctor's name by ID
+  const getDoctorNameById = (doctorId) => {
+    const doctor = doctors.find((doc) => doc._id === doctorId);
+    return doctor ? `${doctor.firstName} ${doctor.lastName}` : "N/A";
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -134,6 +140,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+
       <div className="patients">
         <div className="title">View Patients</div>
         <table id="customers">
@@ -146,6 +153,7 @@ const Home = () => {
               <th>Ward</th>
               <th>Contact</th>
               <th>Status</th>
+              <th>Doctor</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -161,13 +169,38 @@ const Home = () => {
                   <td>{patient.age}</td>
                   <td>{patient.ward?.wardName || "N/A"}</td>
                   <td>{patient.contact}</td>
-                  <td>{patient.status}</td>
+                  <td>
+                    <span
+                      className={`status-badge ${
+                        patient.status === "Admitted"
+                          ? "admitted"
+                          : "discharged"
+                      }`}
+                    >
+                      {patient.status}
+                    </span>
+                  </td>
+                  <td>
+                    {patient.doctors?.length
+                      ? patient.doctors.map((doc, i) => (
+                          <span key={doc._id}>
+                            {doc.name}
+                            {i < patient.doctors.length - 1 && ", "}
+                          </span>
+                        ))
+                      : "N/A"}
+                  </td>
+
+                  {/* This line displays the doctor's name */}
                   <td className="action_button_div">
-                    <button className="action_button">
-                      <i className="fa-solid fa-pen-to-square"></i>
-                    </button>
+                    <Link to={`/update/${patient._id}`}>
+                      <button className="action_button" title="Edit">
+                        <i className="fa-solid fa-pen-to-square"></i>
+                      </button>
+                    </Link>
                     <button
                       className="action_button"
+                      title="Delete"
                       onClick={() => deletePatient(patient._id)}
                     >
                       <i className="fa-solid fa-trash-can"></i>
@@ -178,7 +211,7 @@ const Home = () => {
             ) : (
               <tr>
                 <td
-                  colSpan="8"
+                  colSpan="9"
                   style={{
                     textAlign: "center",
                     padding: "10px",

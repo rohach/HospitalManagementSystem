@@ -6,6 +6,7 @@ import "./layout.css";
 import Doctors from "./components/common/Doctors/Doctors";
 import Patients from "./components/common/Patients/Patients";
 import Wards from "./components/common/Wards/Wards";
+import Update from "./components/common/Patients/Update";
 
 const Layout = ({ isLoggedIn, userRole, userData }) => {
   return (
@@ -44,6 +45,7 @@ const Layout = ({ isLoggedIn, userRole, userData }) => {
               />
             }
           />
+          <Route path="/update/:id" element={<Update />} />
         </Routes>
       </div>
       {/* <Footer /> */}

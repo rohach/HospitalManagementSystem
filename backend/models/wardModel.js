@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const wardSchema = new mongoose.Schema(
   {
     wardName: {
@@ -14,11 +15,11 @@ const wardSchema = new mongoose.Schema(
     capacity: {
       type: Number,
       required: true,
-      minlength: 1,
+      min: 1,
     },
     occupiedBeds: {
       type: Number,
-      required: true,
+      default: 0,
     },
     patients: [
       {

@@ -120,3 +120,27 @@
   -moz-border-radius: 2px;
   border-radius: 2px;
 }
+.doctor-selection {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+}
+
+.doctor-selection legend {
+  font-weight: bold;
+  padding: 0 5px;
+}
+
+.doctor-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.doctor-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
