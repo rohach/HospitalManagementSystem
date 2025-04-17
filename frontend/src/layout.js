@@ -7,6 +7,7 @@ import Doctors from "./components/common/Doctors/Doctors";
 import Patients from "./components/common/Patients/Patients";
 import Wards from "./components/common/Wards/Wards";
 import Update from "./components/common/Patients/Update";
+import Records from "./components/common/Records/Records";
 
 const Layout = ({ isLoggedIn, userRole, userData }) => {
   return (
@@ -39,6 +40,16 @@ const Layout = ({ isLoggedIn, userRole, userData }) => {
             path="wards"
             element={
               <Wards
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                userData={userData}
+              />
+            }
+          />
+          <Route
+            path="records"
+            element={
+              <Records
                 isLoggedIn={isLoggedIn}
                 userRole={userRole}
                 userData={userData}

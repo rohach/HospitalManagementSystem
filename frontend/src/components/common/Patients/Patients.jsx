@@ -10,6 +10,7 @@ import Error from "../../pages/Error";
 import Loading from "../../pages/Loading";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage";
 import defaultImage from "../../assets/default.webp";
+import { Link } from "react-router-dom";
 
 const Patients = ({ userRole, userData }) => {
   const [patients, setPatients] = useState([]);
@@ -183,6 +184,11 @@ const Patients = ({ userRole, userData }) => {
       <ToastifyComponent />
       {(userRole === 1 || userRole === 0) && (
         <div className="container patient">
+          <Link to="/">
+            <button className="back_home">
+              <i className="fa-solid fa-arrow-left"> </i> Back To Home
+            </button>
+          </Link>
           <div className="doctors_heading">
             <h2>View All Patients</h2>
             {userRole === 1 && (

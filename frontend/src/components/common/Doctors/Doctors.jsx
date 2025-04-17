@@ -5,6 +5,7 @@ import Loading from "../../pages/Loading";
 import Error from "../../pages/Error";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage";
 import defaultImage from "../../assets/default.webp";
+import { Link } from "react-router-dom";
 
 const Doctors = ({ userRole }) => {
   const [doctors, setDoctors] = useState([]);
@@ -114,6 +115,11 @@ const Doctors = ({ userRole }) => {
 
   return (
     <div className="container doctor">
+      <Link to="/">
+        <button className="back_home">
+          <i className="fa-solid fa-arrow-left"> </i> Back To Home
+        </button>
+      </Link>
       <ToastifyComponent />
       <div className="doctors_heading">
         <h2>View All Doctors</h2>
@@ -275,11 +281,15 @@ const Doctors = ({ userRole }) => {
                     onChange={handleInputChange}
                   >
                     <option value="">Select Ward</option>
-                    {wardsList.map((ward) => (
-                      <option key={ward._id} value={ward._id}>
-                        {ward.name}
-                      </option>
-                    ))}
+                    {wardsList && wardsList.length > 0 ? (
+                      wardsList.map((ward) => (
+                        <option key={ward._id} value={ward._id}>
+                          {ward.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No wards available</option>
+                    )}
                   </select>
                 </div>
                 <div className="text-input">
@@ -290,11 +300,15 @@ const Doctors = ({ userRole }) => {
                     onChange={handleInputChange}
                   >
                     <option value="">Select Treated Patient</option>
-                    {patientsList.map((patient) => (
-                      <option key={patient._id} value={patient._id}>
-                        {patient.name}
-                      </option>
-                    ))}
+                    {patientsList && patientsList.length > 0 ? (
+                      patientsList.map((patient) => (
+                        <option key={patient._id} value={patient._id}>
+                          {patient.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No patients available</option>
+                    )}
                   </select>
                 </div>
 

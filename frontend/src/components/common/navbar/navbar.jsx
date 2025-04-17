@@ -76,11 +76,11 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
                         </Link>
                       </li>
                       <li className="item">
-                        <a href="#">
+                        <Link to="records">
                           <i className="fa-solid fa-file-medical"></i>
                           <span className="item-text">Records</span>
                           <span className="item-tooltip">Records</span>
-                        </a>
+                        </Link>
                       </li>
                     </>
                   )}
@@ -108,7 +108,7 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
                         </Link>
                       </li>
                       <li className="item">
-                        <Link to="doctors">
+                        <Link to="records">
                           <i className="fa-solid fa-user-doctor"></i>
                           <span className="item-text">Records</span>
                           <span className="item-tooltip">Records</span>
@@ -120,20 +120,6 @@ const Navbar = ({ isLoggedIn, userRole, userData }) => {
               </div>
               <div className="section settings-section">
                 <ul className="items">
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-bell"></i>
-                      <span className="item-text">Notifications</span>
-                      <span className="item-tooltip">Notifications</span>
-                    </a>
-                  </li>
-                  <li className="item">
-                    <a href="#">
-                      <i className="fa-solid fa-gear"></i>
-                      <span className="item-text">Settings</span>
-                      <span className="item-tooltip">Settings</span>
-                    </a>
-                  </li>
                   <li className="item" onClick={logOut}>
                     <a href="">
                       <i className="fa-solid fa-arrow-right-from-bracket"></i>

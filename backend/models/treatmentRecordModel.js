@@ -11,20 +11,22 @@ const treatmentRecordSchema = new mongoose.Schema({
     ref: "Doctor",
     required: true,
   },
-  wardId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Ward",
-    required: false,
-  }, // If applicable
+  wardId: { type: mongoose.Schema.Types.ObjectId, ref: "Ward", required: true },
+  treatmentDetails: { type: String, required: true },
   admissionDate: { type: Date, default: Date.now },
-  dischargeDate: { type: Date },
+  transferHistory: [
+    {
+      previousWardId: { type: mongoose.Schema.Types.ObjectId, ref: "Ward" },
+      newWardId: { type: mongoose.Schema.Types.ObjectId, ref: "Ward" },
+      transferredAt: { type: Date, default: Date.now },
+    },
+  ],
   transferred: { type: Boolean, default: false },
-  treatmentDetails: { type: String },
-  notes: { type: String },
 });
 
 const TreatmentRecord = mongoose.model(
   "TreatmentRecord",
   treatmentRecordSchema
 );
+
 module.exports = TreatmentRecord;

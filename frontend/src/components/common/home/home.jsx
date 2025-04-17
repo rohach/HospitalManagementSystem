@@ -10,6 +10,8 @@ const Home = () => {
   const [doctors, setDoctors] = useState([]);
   const [patientCount, setPatientCount] = useState(0);
   const [doctorCount, setDoctorCount] = useState(0);
+  const [wardCount, setWardCount] = useState(0);
+  const [recordCount, setRecordCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -40,8 +42,32 @@ const Home = () => {
       }
     };
 
+    const getWards = async () => {
+      try {
+        const data = await fetchData("ward/getAllWards");
+        setWardCount(data.wards.length);
+      } catch (error) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const getRecords = async () => {
+      try {
+        const data = await fetchData("treatmentRecord/treatmentRecords");
+        setRecordCount(data.treatmentRecords.length);
+      } catch (error) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     getPatients();
     getDoctors();
+    getWards();
+    getRecords();
   }, []);
 
   const deletePatient = async (patientId) => {
@@ -127,16 +153,20 @@ const Home = () => {
             <div className="box_icon">
               <i className="fa-solid fa-bed icon ward_icon"></i>
             </div>
-            <p className="box_count">150</p>
-            <button className="see_more">See More</button>
+            <p className="box_count">{wardCount}</p>
+            <Link to="wards">
+              <button className="see_more">See More</button>
+            </Link>
           </div>
           <div className="box historyCount">
             <p className="box_heading">Treatment History</p>
             <div className="box_icon">
               <i className="fa-solid fa-calendar icon treatment_icon"></i>
             </div>
-            <p className="box_count">150</p>
-            <button className="see_more">See More</button>
+            <p className="box_count">{recordCount}</p>
+            <Link to="records">
+              <button className="see_more">See More</button>
+            </Link>
           </div>
         </div>
       </div>

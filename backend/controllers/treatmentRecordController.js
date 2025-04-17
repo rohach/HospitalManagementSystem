@@ -2,6 +2,7 @@ const TreatmentRecord = require("../models/treatmentRecordModel");
 const Patient = require("../models/patientModel");
 const Doctor = require("../models/doctorModel");
 const Ward = require("../models/wardModel");
+const mongoose = require("mongoose");
 
 // Add a new treatment record
 exports.addTreatmentRecord = async (req, res) => {
@@ -164,12 +165,41 @@ exports.deleteTreatmentRecord = async (req, res) => {
       });
     }
 
-    await treatmentRecord.remove();
+    await TreatmentRecord.findByIdAndDelete(req.params.id);
 
     return res.status(200).json({
       success: true,
       message: "Treatment Record deleted successfully!",
     });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+// Get all treatment records for a specific patient
+exports.getTreatmentRecordsByPatientId = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const treatmentRecords = await TreatmentRecord.find({
+      patientId: new mongoose.Types.ObjectId(patientId),
+    }).populate("patientId doctorId wardId");
+
+    if (treatmentRecords.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: `Treatment Records for patient ${patientId} retrieved successfully!`,
+        treatmentRecords,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "No Treatment Records found for this patient!",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,

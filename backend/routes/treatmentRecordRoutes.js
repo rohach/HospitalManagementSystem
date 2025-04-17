@@ -14,7 +14,12 @@ router.get(
 // Get a single treatment record by ID
 router.get(
   "/treatmentRecords/:id",
-  treatmentRecordController.getSingleTreatmentRecord
+  treatmentRecordController.getTreatmentRecordsByPatientId
+);
+// Get all treatment records of a patient
+router.get(
+  "/treatmentRecords/:patientId",
+  treatmentRecordController.getTreatmentRecordsByPatientId
 );
 
 // Update a treatment record

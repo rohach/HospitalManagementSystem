@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 // Register a Patient
 exports.registerPatient = async (req, res) => {
   try {
-    const {
+    let {
       patientName,
       patientCaste,
       age,
@@ -17,8 +17,20 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors, // Array of doctor IDs
+      doctors, // Array of doctor IDs or single doctor ID
     } = req.body;
+
+    // Auto-wrap doctors into an array if it's a single string
+    if (doctors && !Array.isArray(doctors)) {
+      if (typeof doctors === "string") {
+        doctors = [doctors];
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "'doctors' field must be an array or a valid string!",
+        });
+      }
+    }
 
     // Check if patient already exists
     const existingPatient = await Patient.findOne({ contact });
@@ -29,14 +41,7 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // Validate doctors input is an array and valid ObjectId
-    if (doctors && !Array.isArray(doctors)) {
-      return res.status(400).json({
-        success: false,
-        message: "'doctors' field must be an array!",
-      });
-    }
-
+    // Validate doctor IDs
     if (
       doctors &&
       doctors.some((doctorId) => !mongoose.Types.ObjectId.isValid(doctorId))
@@ -90,7 +95,7 @@ exports.registerPatient = async (req, res) => {
     // Create a treatment record for the patient
     const newTreatmentRecord = new TreatmentRecord({
       patientId: newPatient._id,
-      doctorId: doctors[0], // Assuming the first doctor is the primary doctor
+      doctorId: doctors?.[0], // Assign first doctor as primary (if exists)
       wardId: ward,
       treatmentDetails: "Initial treatment details for patient",
       admissionDate: new Date(),
@@ -178,7 +183,6 @@ exports.deletePatient = async (req, res) => {
   try {
     const patientId = req.params.id;
 
-    // Find the patient first
     const patient = await Patient.findById(patientId);
     if (!patient) {
       return res.status(404).json({
@@ -187,18 +191,21 @@ exports.deletePatient = async (req, res) => {
       });
     }
 
-    // Update the Ward to remove the patient from its patients array
+    // Update Ward
     await Ward.updateMany(
-      { patients: patientId }, // Find wards that have this patient
-      { $pull: { patients: patientId } } // Remove patient from the ward's patients array
+      { patients: patientId },
+      { $pull: { patients: patientId } }
     );
 
-    // Now delete the patient from the Patient collection
+    // Delete related treatment records
+    await TreatmentRecord.deleteMany({ patientId: patientId });
+
+    // Delete patient
     await Patient.findByIdAndDelete(patientId);
 
     res.status(200).json({
       success: true,
-      message: "Patient deleted successfully!",
+      message: "Patient and their treatment records deleted successfully!",
     });
   } catch (error) {
     res.status(500).json({
@@ -209,15 +216,14 @@ exports.deletePatient = async (req, res) => {
   }
 };
 
+// Update Patient
+// Update Patient
 exports.updatePatient = async (req, res) => {
   try {
     const { id: patientId } = req.params;
     const updateData = req.body;
 
-    // Get existing patient details
     const patientDetail = await Patient.findById(patientId);
-
-    // If patient not found, return an error
     if (!patientDetail) {
       return res.status(404).json({
         success: false,
@@ -225,35 +231,48 @@ exports.updatePatient = async (req, res) => {
       });
     }
 
-    // Ensure the contact number is not updated
     if (updateData.contact) {
-      delete updateData.contact; // Remove the contact field from updateData if present
+      delete updateData.contact; // Do not allow contact update
     }
 
-    // Ensure the doctor field is an array (for multiple doctors)
-    if (updateData.doctor && !Array.isArray(updateData.doctor)) {
-      updateData.doctor = [updateData.doctor]; // Ensure doctor is an array of _id
+    if (updateData.doctors && !Array.isArray(updateData.doctors)) {
+      if (typeof updateData.doctors === "string") {
+        updateData.doctors = [updateData.doctors];
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "'doctors' field must be an array or valid string!",
+        });
+      }
     }
 
-    // Update the patient details
     const updatedPatient = await Patient.findByIdAndUpdate(
       patientId,
       updateData,
-      {
-        new: true, // Ensure we get the updated patient document
-        runValidators: true, // Run the model's validation checks
-      }
+      { new: true, runValidators: true }
     )
       .populate({ path: "ward", select: "wardName _id" })
       .populate("doctors");
 
+    // Update related Treatment Records
+    await TreatmentRecord.updateMany(
+      { patientId: patientId },
+      {
+        $set: {
+          doctorId: updateData.doctors?.[0] || patientDetail.doctors[0],
+          wardId: updateData.ward || patientDetail.ward,
+          treatmentDetails: "Updated due to patient profile change.",
+        },
+      }
+    );
+
     return res.status(200).json({
       success: true,
-      message: "Patient updated successfully!",
+      message: "Patient and related treatment records updated successfully!",
       patient: updatedPatient,
     });
   } catch (error) {
-    console.error(error); // Add logging for easier debugging
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Server Error",

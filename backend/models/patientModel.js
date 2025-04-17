@@ -55,6 +55,10 @@ const patientSchema = mongoose.Schema(
     address: {
       type: String,
     },
+    transferred: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

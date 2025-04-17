@@ -5,6 +5,7 @@ import Loading from "../../pages/Loading";
 import Error from "../../pages/Error";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage";
 import defaultImage from "../../assets/default-ward.avif";
+import { Link } from "react-router-dom";
 
 const Wards = ({ userRole }) => {
   const [wards, setWards] = useState([]);
@@ -88,6 +89,11 @@ const Wards = ({ userRole }) => {
 
   return (
     <div className="container wards">
+      <Link to="/">
+        <button className="back_home">
+          <i className="fa-solid fa-arrow-left"> </i> Back To Home
+        </button>
+      </Link>
       <ToastifyComponent />
       <div className="doctors_heading">
         <h2>View All Wards</h2>

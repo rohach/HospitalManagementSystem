@@ -46,3 +46,13 @@ body {
 .container {
   padding-left: 2rem !important;
 }
+.back_home {
+  border: 1px solid var(--blue);
+  color: var(--bg);
+  background-color: var(--blue);
+  padding: 0.5rem 0.75rem;
+  border-radius: 7px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  margin-top: 2rem;
+}
