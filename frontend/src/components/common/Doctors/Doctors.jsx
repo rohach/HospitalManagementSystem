@@ -36,13 +36,11 @@ const Doctors = ({ userRole }) => {
         const doctorResponse = await fetchData("doctor/getAllDoctors");
         setDoctors(doctorResponse.doctors);
 
-        // const juniorDoctorsData = await fetchData("doctor/getJuniorDoctors");
         const wardsData = await fetchData("ward/getAllWards");
         const patientsData = await fetchData("patient/getAllPatients");
 
-        // setJuniorDoctorsList(juniorDoctorsData);
-        setWardsList(wardsData);
-        setPatientsList(patientsData);
+        setWardsList(wardsData.wards);
+        setPatientsList(patientsData.patients);
       } catch (err) {
         console.error(err);
         setError(true);
@@ -169,7 +167,7 @@ const Doctors = ({ userRole }) => {
 
                   <div className="assigned_wards">
                     <p>Wards:</p>
-                    {doctor.wards?.length ? (
+                    {wardsList.length ? (
                       <ul>
                         {doctor.wards.map((ward) => (
                           <li key={ward._id}>{ward.wardName}</li>
@@ -242,37 +240,76 @@ const Doctors = ({ userRole }) => {
                 ></i>
               </div>
               <form className="form-inputs" onSubmit={addDoctor}>
-                {["name", "grade", "contact", "email", "specialty"].map(
-                  (field) => (
-                    <div className="text-input" key={field}>
-                      <label htmlFor={field}>
-                        {field.charAt(0).toUpperCase() + field.slice(1)}
-                      </label>
-                      <input
-                        type={field === "email" ? "email" : "text"}
-                        name={field}
-                        value={doctorData[field]}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  )
-                )}
+                {["name", "contact", "email"].map((field) => (
+                  <div className="text-input" key={field}>
+                    <label htmlFor={field}>
+                      {field.charAt(0).toUpperCase() + field.slice(1)}
+                    </label>
+                    <input
+                      type={field === "email" ? "email" : "text"}
+                      name={field}
+                      value={doctorData[field]}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                ))}
                 <div className="text-input">
-                  <label htmlFor="juniorDoctors">Junior Doctors</label>
+                  <label htmlFor="specialty">Specialty</label>
                   <select
-                    name="juniorDoctors"
-                    value={doctorData.juniorDoctors}
+                    name="specialty"
+                    value={doctorData.specialty}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Junior Doctor</option>
-                    {juniorDoctorsList.map((doc) => (
-                      <option key={doc._id} value={doc._id}>
-                        Dr. {doc.name}
+                    <option value="">Select Specialty</option>
+                    {[
+                      "Cardiology",
+                      "Neurology",
+                      "Orthopedics",
+                      "Pediatrics",
+                      "General Surgery",
+                    ].map((specialty, index) => (
+                      <option key={index} value={specialty}>
+                        {specialty}
                       </option>
                     ))}
                   </select>
                 </div>
+
+                <div className="text-input" key="grade">
+                  <label htmlFor="grade">Grade</label>
+                  <select
+                    name="grade"
+                    value={doctorData.grade}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Grade</option>
+                    <option value="Junior">Junior</option>
+                    <option value="Senior">Senior</option>
+                  </select>
+                </div>
+
+                {doctorData.grade === "Senior" && (
+                  <div className="text-input">
+                    <label htmlFor="juniorDoctors">Junior Doctors</label>
+                    <select
+                      name="juniorDoctors"
+                      value={doctorData.juniorDoctors}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Junior Doctor</option>
+                      {doctors
+                        .filter((doc) => doc.grade === "Junior") // Filter junior doctors here
+                        .map((doc) => (
+                          <option key={doc._id} value={doc._id}>
+                            Dr. {doc.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="text-input">
                   <label htmlFor="wardId">Ward</label>
                   <select
@@ -284,7 +321,7 @@ const Doctors = ({ userRole }) => {
                     {wardsList && wardsList.length > 0 ? (
                       wardsList.map((ward) => (
                         <option key={ward._id} value={ward._id}>
-                          {ward.name}
+                          {ward.wardName}
                         </option>
                       ))
                     ) : (
@@ -303,7 +340,7 @@ const Doctors = ({ userRole }) => {
                     {patientsList && patientsList.length > 0 ? (
                       patientsList.map((patient) => (
                         <option key={patient._id} value={patient._id}>
-                          {patient.name}
+                          {patient.patientName}
                         </option>
                       ))
                     ) : (

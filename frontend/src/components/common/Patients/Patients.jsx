@@ -440,7 +440,7 @@ const Patients = ({ userRole, userData }) => {
                       </select>
                     </div>
 
-                    <div className="submit-btn">
+                    <div className="add_doctor">
                       <button type="submit" className="btn">
                         {editing ? "Update Patient" : "Add Patient"}
                       </button>

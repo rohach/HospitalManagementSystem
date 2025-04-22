@@ -95,8 +95,8 @@ exports.registerDoctor = async (req, res) => {
 exports.getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find()
-      .populate("wards") // Populate assigned wards
-      .populate("treatedPatients"); // Populate treated patients
+      .populate("wards", "wardName") // Populate wards' names
+      .populate("treatedPatients", "patientName"); // Populate treated patients' names
 
     res.status(200).json({
       success: true,
