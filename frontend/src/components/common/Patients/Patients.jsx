@@ -101,7 +101,7 @@ const Patients = ({ userRole, userData }) => {
       }
       resetForm();
     } catch (error) {
-      notify(error.response?.data?.message || "Operation failed", "error");
+      notify(error.response?.message || "Operation failed", "error");
     } finally {
       setLoading(false);
     }

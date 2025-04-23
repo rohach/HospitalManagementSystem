@@ -87,6 +87,7 @@ const Records = () => {
             <th>Contact</th>
             <th>Status</th>
             <th>Doctor</th>
+            <th>Treatment History</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -110,6 +111,8 @@ const Records = () => {
                   </span>
                 </td>
                 <td>{record.doctorId?.name || "N/A"}</td>
+
+                <td>{record.treatmentDetails || "N/A"}</td>
                 <td className="action_button_div">
                   {/* <Link to={`/update/${record._id}`}>
                     <button className="action_button" title="Edit">

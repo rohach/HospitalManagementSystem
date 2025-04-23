@@ -22,15 +22,21 @@ exports.addWard = async (req, res) => {
         });
       }
 
-      // Set the number of occupied beds dynamically based on patients
-      const occupiedBeds = patients ? patients.length : 0;
+      const patientCount = patients ? patients.length : 0;
 
-      // Create a new ward
+      // Check for over-capacity on creation
+      if (patientCount > capacity) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot add ward. Number of patients exceeds capacity!",
+        });
+      }
+
       const newWard = new Ward({
         wardName,
         wardType,
         capacity,
-        occupiedBeds,
+        occupiedBeds: patientCount,
         patients,
         image: imagePath,
       });
@@ -113,14 +119,14 @@ exports.deleteWard = async (req, res) => {
       });
     }
 
-    // Remove patients from the ward before deleting it
-    const patientIds = wardDetail.patients; // Get patient IDs
+    const patientIds = wardDetail.patients;
+
+    // Remove ward reference from patients
     await Patient.updateMany(
       { _id: { $in: patientIds } },
-      { $pull: { wards: wardDetail._id } } // Remove this ward from patients' ward list
+      { $pull: { wards: wardDetail._id } }
     );
 
-    // Delete the ward
     await Ward.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
@@ -133,5 +139,24 @@ exports.deleteWard = async (req, res) => {
       message: "Server Error",
       error: error.message,
     });
+  }
+};
+
+// ⚠️ Optional helper function (for your patient controller)
+// Prevents assigning more patients than allowed
+exports.canAssignPatient = async (wardId) => {
+  const ward = await Ward.findById(wardId);
+  if (!ward) return { allowed: false, message: "Ward not found!" };
+  if (ward.occupiedBeds >= ward.capacity) {
+    return { allowed: false, message: "Ward is full!" };
+  }
+  return { allowed: true, ward };
+};
+
+// ⚠️ Another helper (used when moving patients between wards)
+exports.updateOccupiedBedsOnTransfer = async (oldWardId, newWardId) => {
+  if (oldWardId && oldWardId !== newWardId) {
+    await Ward.findByIdAndUpdate(oldWardId, { $inc: { occupiedBeds: -1 } });
+    await Ward.findByIdAndUpdate(newWardId, { $inc: { occupiedBeds: 1 } });
   }
 };

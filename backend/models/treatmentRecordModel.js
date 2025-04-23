@@ -9,7 +9,7 @@ const treatmentRecordSchema = new mongoose.Schema({
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doctor",
-    required: true,
+    // required: true,
   },
   wardId: { type: mongoose.Schema.Types.ObjectId, ref: "Ward", required: true },
   treatmentDetails: { type: String, required: true },
