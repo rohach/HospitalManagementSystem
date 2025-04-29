@@ -35,7 +35,7 @@ const patientSchema = mongoose.Schema(
     ward: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ward",
-      required: true,
+      required: false,
     },
     doctors: [
       {

@@ -17,9 +17,15 @@ exports.registerPatient = async (req, res) => {
       contact,
       status,
       ward,
-      doctors, // Array of doctor IDs or single doctor ID
+      doctors,
       email,
     } = req.body;
+
+    // Handle empty ward string
+    if (ward === "") {
+      ward = null;
+    }
+
     // Auto-wrap doctors into an array if it's a single string
     if (doctors && !Array.isArray(doctors)) {
       if (typeof doctors === "string") {
@@ -31,6 +37,7 @@ exports.registerPatient = async (req, res) => {
         });
       }
     }
+
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -38,7 +45,6 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // Check if patient already exists
     const existingPatient = await Patient.findOne({ contact });
     if (existingPatient) {
       return res.status(400).json({
@@ -58,13 +64,11 @@ exports.registerPatient = async (req, res) => {
       });
     }
 
-    // Handle patient image upload
     let imageUrl = "";
     if (req.file) {
       imageUrl = req.file.path;
     }
 
-    // Create new patient instance
     const newPatient = new Patient({
       patientName,
       patientCaste,
@@ -72,26 +76,27 @@ exports.registerPatient = async (req, res) => {
       gender,
       contact,
       status,
-      ward,
+      ward: ward || undefined, // Only include if valid
       email,
-      doctors, // Attach doctors to the patient
+      doctors,
       image: imageUrl,
     });
 
-    // Save the patient
     await newPatient.save();
 
-    // Update the ward
-    const updatedWard = await Ward.findByIdAndUpdate(
-      ward,
-      {
-        $inc: { occupiedBeds: 1 },
-        $push: { patients: newPatient._id },
-      },
-      { new: true }
-    ).populate("patients");
+    // Update ward if valid
+    let updatedWard = null;
+    if (mongoose.Types.ObjectId.isValid(ward)) {
+      updatedWard = await Ward.findByIdAndUpdate(
+        ward,
+        {
+          $inc: { occupiedBeds: 1 },
+          $push: { patients: newPatient._id },
+        },
+        { new: true }
+      ).populate("patients");
+    }
 
-    // Update the doctors' treatedPatients array to include the new patient
     if (doctors && doctors.length > 0) {
       await Doctor.updateMany(
         { _id: { $in: doctors } },
@@ -99,29 +104,25 @@ exports.registerPatient = async (req, res) => {
       );
     }
 
-    // Create a treatment record for the patient
     const newTreatmentRecord = new TreatmentRecord({
       patientId: newPatient._id,
-      doctorId: doctors?.[0], // Assign first doctor as primary (if exists)
-      wardId: ward,
+      doctorId: doctors?.[0],
+      wardId: mongoose.Types.ObjectId.isValid(ward) ? ward : null,
       treatmentDetails: "Initial treatment details for patient",
       admissionDate: new Date(),
     });
 
-    // Save the treatment record
     await newTreatmentRecord.save();
 
-    // Populate patient with ward and doctors details
     const populatedPatient = await Patient.findById(newPatient._id)
       .populate("ward")
       .populate("doctors");
 
-    // Return success response
     return res.status(201).json({
       success: true,
       message: "Patient registered successfully!",
       patient: populatedPatient,
-      ward: updatedWard, // Return updated ward info
+      ward: updatedWard,
     });
   } catch (error) {
     return res.status(500).json({

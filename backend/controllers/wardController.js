@@ -62,18 +62,20 @@ exports.addWard = async (req, res) => {
 exports.getAllWards = async (req, res) => {
   try {
     const wards = await Ward.find();
-    if (wards.length > 0) {
+
+    if (wards.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "Wards retrieved successfully!",
-        wards,
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No Ward found!",
+        message: "No wards found.",
+        wards: [],
       });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Wards retrieved successfully!",
+      wards,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

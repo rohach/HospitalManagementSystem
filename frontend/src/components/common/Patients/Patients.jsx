@@ -395,7 +395,7 @@ const Patients = ({ userRole, userData }) => {
                         name="ward"
                         value={selectedWard}
                         onChange={handleWardChange}
-                        required
+                        // required
                       >
                         <option value="">Select Ward</option>
                         {wards.map((ward) => (

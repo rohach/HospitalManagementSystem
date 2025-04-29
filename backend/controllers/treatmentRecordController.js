@@ -67,18 +67,19 @@ exports.getAllTreatmentRecords = async (req, res) => {
       "patientId doctorId wardId"
     );
 
-    if (treatmentRecords.length > 0) {
+    if (treatmentRecords.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "Treatment Records retrieved successfully!",
-        treatmentRecords,
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No Treatment Records found!",
+        message: "No treatment records found.",
+        treatmentRecords: [],
       });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Treatment records retrieved successfully!",
+      treatmentRecords,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

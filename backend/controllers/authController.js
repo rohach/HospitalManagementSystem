@@ -104,18 +104,18 @@ exports.getAllUsers = async (req, res) => {
   try {
     const users = await Auth.find().select("-password");
 
-    if (!users) {
-      res.status(400).json({
-        success: false,
-        message: "No Users Found!",
-        users,
-      });
-    } else {
-      res.status(200).json({
+    if (users.length === 0) {
+      return res.status(200).json({
         success: true,
-        users,
+        message: "No users found.",
+        users: [],
       });
     }
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

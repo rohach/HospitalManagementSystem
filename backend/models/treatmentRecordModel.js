@@ -11,7 +11,11 @@ const treatmentRecordSchema = new mongoose.Schema({
     ref: "Doctor",
     // required: true,
   },
-  wardId: { type: mongoose.Schema.Types.ObjectId, ref: "Ward", required: true },
+  wardId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ward",
+    required: false,
+  },
   treatmentDetails: { type: String, required: true },
   admissionDate: { type: Date, default: Date.now },
   transferHistory: [

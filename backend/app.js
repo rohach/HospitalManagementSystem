@@ -8,6 +8,7 @@ const teamRoutes = require("./routes/teamRoutes");
 const wardRoutes = require("./routes/wardRoutes");
 const authRoutes = require("./routes/authRoutes");
 const treatmentRecordRoutes = require("./routes/treatmentRecordRoutes");
+const createDefaultAdmin = require("./controllers/initAdmin");
 const path = require("path");
 const cors = require("cors");
 
@@ -32,6 +33,7 @@ app.use("/api/v1/treatmentRecord", treatmentRecordRoutes);
 
 app.listen(PORT, () => {
   try {
+    createDefaultAdmin();
     console.log(`Server is up and running on PORT:${PORT}`);
   } catch (error) {
     console.log(error.message);
