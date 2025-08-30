@@ -2,52 +2,137 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh; /* allow scrolling if content overflows */
+  padding: 1rem;
 }
+
 .login_container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 2rem;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 10px;
-  height: 80%;
-  width: 80%;
+  padding: 2rem;
+  background: #fff;
+  max-width: 1200px;
+  width: 100%;
 }
+
+/* Equal flex for both sides */
 .login_container > * {
-  flex-basis: 100%;
+  flex: 1;
 }
-.login_left > * {
+
+.login_left {
   display: flex;
-  align-items: center;
-  gap: 1rem;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
 .login_left h1 {
   margin-bottom: 2rem;
 }
-form > * {
-  width: 50%;
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
 }
+
+form > * {
+  width: 80%;
+  max-width: 350px;
+}
+
 .input_field {
   padding: 0.75rem 0.5rem;
   border: none;
-  /* border-bottom: 1px solid rgb(173, 173, 173); */
   outline: 1px solid rgb(173, 173, 173);
   border-radius: 10px;
+  font-size: 1rem;
 }
+
 .register {
   margin-top: 1rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: rgb(100, 100, 100);
+  text-align: center;
 }
+
 .submit {
-  padding: 0.75rem 0.5rem;
+  padding: 0.75rem;
   cursor: pointer;
   border: none;
   background-color: var(--blue);
   color: var(--white);
   border-radius: 10px;
-  width: 25%;
+  width: 50%;
+  max-width: 200px;
   margin-top: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .login_container {
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  form > * {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .login_container {
+    flex-direction: column-reverse;
+    padding: 1.5rem;
+    height: auto;
+  }
+
+  .login_left {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .login_right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login_right canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  .submit {
+    width: 70%;
+  }
+}
+
+@media (max-width: 480px) {
+  .login_container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  form > * {
+    width: 100%;
+  }
+
+  .submit {
+    width: 100%;
+    max-width: none;
+  }
+
+  .login_left h1 {
+    font-size: 1.5rem;
+  }
 }
