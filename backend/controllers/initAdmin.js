@@ -11,8 +11,8 @@ const createDefaultAdmin = async () => {
     }
 
     const name = process.env.DEFAULT_ADMIN_NAME || "Admin";
-    const email = process.env.DEFAULT_ADMIN_EMAIL;
-    const password = process.env.DEFAULT_ADMIN_PASSWORD;
+    const email = process.env.DEFAULT_ADMIN_EMAIL || "admin@hms.com";
+    const password = process.env.DEFAULT_ADMIN_PASSWORD || "admin@123";
 
     if (!email || !password) {
       console.warn(
