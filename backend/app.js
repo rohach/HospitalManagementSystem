@@ -1,10 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config({ path: "./config/config.env" });
 const path = require("path");
 const cors = require("cors");
-
-dotenv.config({ path: "./config/config.env" });
-
+console.log(process.env.MONGO_URL);
 async function startServer() {
   // Polyfills only if Node <18 (optional)
   const { fetch, Headers, Request, Response } = await import("undici");
