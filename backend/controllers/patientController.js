@@ -1,12 +1,71 @@
 const Patient = require("../models/patientModel");
-const Doctor = require("../models/doctorModel"); // Import Doctor model
+const Doctor = require("../models/doctorModel");
 const Ward = require("../models/wardModel");
-const fs = require("fs"); // To handle file deletion when updating or deleting patients
-const upload = require("../middleware/multer"); // Import multer middleware
 const TreatmentRecord = require("../models/treatmentRecordModel");
+const fs = require("fs");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-// Register a Patient
+// ----------------- Mock AI Logic -----------------
+function mockRiskPrediction(patient) {
+  let riskScore = 0.1;
+  const riskFlags = [];
+
+  if (patient.age >= 60) {
+    riskScore += 0.3;
+    riskFlags.push("elderly");
+  }
+
+  if (patient.status && patient.status.toLowerCase() === "critical") {
+    riskScore += 0.5;
+    riskFlags.push("critical_condition");
+  }
+
+  riskScore += (Math.random() - 0.5) * 0.2;
+  riskScore = Math.min(Math.max(riskScore, 0), 1);
+
+  return { riskScore, riskFlags };
+}
+
+function mockAIReportSummary(patient, riskScore, riskFlags) {
+  let summary = `Patient ${patient.patientName} is a ${patient.age}-year-old ${patient.gender}. `;
+  if (riskScore > 0.7) summary += "Patient is at high risk due to ";
+  else if (riskScore > 0.4)
+    summary += "Patient has moderate risk factors including ";
+  else summary += "Patient is currently low risk with ";
+
+  if (riskFlags.length > 0) summary += riskFlags.join(", ") + ".";
+  else summary += "no significant risk flags.";
+
+  return summary;
+}
+
+function mockSmartScheduling(admissionDate, riskScore) {
+  const baseDays = 30;
+  let daysUntilNext = baseDays;
+  if (riskScore > 0.7) daysUntilNext = 7;
+  else if (riskScore > 0.4) daysUntilNext = 14;
+
+  const nextAppointment = new Date(admissionDate);
+  nextAppointment.setDate(nextAppointment.getDate() + daysUntilNext);
+  return nextAppointment;
+}
+
+async function smartSchedule() {
+  const wards = await Ward.find().sort({ occupiedBeds: 1, capacity: 1 });
+  const doctors = await Doctor.find().sort({ treatedPatientsCount: 1 });
+  const ward = wards.find((w) => w.occupiedBeds < w.capacity);
+  const doctor = doctors.length > 0 ? doctors[0] : null;
+
+  return {
+    wardId: ward?._id || null,
+    doctorId: doctor?._id || null,
+  };
+}
+
+// ----------------- Controller Methods -----------------
+
+// Register Patient
 exports.registerPatient = async (req, res) => {
   try {
     let {
@@ -19,55 +78,40 @@ exports.registerPatient = async (req, res) => {
       ward,
       doctors,
       email,
+      password,
+      conditions,
     } = req.body;
 
-    // Handle empty ward string
-    if (ward === "") {
-      ward = null;
-    }
-
-    // Auto-wrap doctors into an array if it's a single string
-    if (doctors && !Array.isArray(doctors)) {
-      if (typeof doctors === "string") {
-        doctors = [doctors];
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: "'doctors' field must be an array or a valid string!",
-        });
-      }
-    }
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required to register a patient.",
-      });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required." });
     }
 
     const existingPatient = await Patient.findOne({ contact });
     if (existingPatient) {
       return res.status(400).json({
         success: false,
-        message: "Patient with this contact number already exists!",
+        message: "Patient with this contact already exists!",
       });
     }
 
-    // Validate doctor IDs
-    if (
-      doctors &&
-      doctors.some((doctorId) => !mongoose.Types.ObjectId.isValid(doctorId))
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "One or more doctor IDs are invalid!",
-      });
+    if (!ward || ward === "") {
+      const schedule = await smartSchedule();
+      ward = schedule.wardId;
+      doctors =
+        doctors && doctors.length > 0
+          ? doctors
+          : [schedule.doctorId].filter(Boolean);
     }
+
+    if (doctors && !Array.isArray(doctors)) doctors = [doctors];
+    if (conditions && !Array.isArray(conditions)) conditions = [conditions];
 
     let imageUrl = "";
-    if (req.file) {
-      imageUrl = req.file.path;
-    }
+    if (req.file) imageUrl = req.file.path;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newPatient = new Patient({
       patientName,
@@ -76,25 +120,21 @@ exports.registerPatient = async (req, res) => {
       gender,
       contact,
       status,
-      ward: ward || undefined, // Only include if valid
+      ward: ward || undefined,
       email,
       doctors,
       image: imageUrl,
+      password: hashedPassword,
+      conditions,
     });
 
     await newPatient.save();
 
-    // Update ward if valid
-    let updatedWard = null;
     if (mongoose.Types.ObjectId.isValid(ward)) {
-      updatedWard = await Ward.findByIdAndUpdate(
-        ward,
-        {
-          $inc: { occupiedBeds: 1 },
-          $push: { patients: newPatient._id },
-        },
-        { new: true }
-      ).populate("patients");
+      await Ward.findByIdAndUpdate(ward, {
+        $inc: { occupiedBeds: 1 },
+        $push: { patients: newPatient._id },
+      });
     }
 
     if (doctors && doctors.length > 0) {
@@ -104,296 +144,255 @@ exports.registerPatient = async (req, res) => {
       );
     }
 
+    const admissionDate = new Date();
     const newTreatmentRecord = new TreatmentRecord({
       patientId: newPatient._id,
-      doctorId: doctors?.[0],
-      wardId: mongoose.Types.ObjectId.isValid(ward) ? ward : null,
-      treatmentDetails: "Initial treatment details for patient",
-      admissionDate: new Date(),
+      doctorId: doctors?.[0] || null,
+      wardId: ward || null,
+      treatmentDetails: "Initial admission and treatment",
+      admissionDate,
+      dischargeDate: null,
     });
-
     await newTreatmentRecord.save();
 
+    const { riskScore, riskFlags } = mockRiskPrediction(newPatient);
+    const aiReportSummary = mockAIReportSummary(
+      newPatient,
+      riskScore,
+      riskFlags
+    );
+    const nextAppointment = mockSmartScheduling(admissionDate, riskScore);
+
     const populatedPatient = await Patient.findById(newPatient._id)
-      .populate("ward")
-      .populate("doctors");
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate({ path: "doctors", select: "doctorName _id" })
+      .select("-password");
 
     return res.status(201).json({
       success: true,
       message: "Patient registered successfully!",
       patient: populatedPatient,
-      ward: updatedWard,
+      aiReport: {
+        riskScore,
+        riskFlags,
+        summary: aiReportSummary,
+        nextAppointmentDate: nextAppointment,
+      },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
-// Get all Patients
-exports.getAllPatients = async (req, res) => {
+// Get AI Report
+exports.getPatientReport = async (req, res) => {
   try {
-    const patients = await Patient.find()
-      .populate({ path: "ward", select: "wardName _id" })
-      .populate("doctors");
+    const patientId = req.params.id;
+    const patient = await Patient.findById(patientId);
+    if (!patient)
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
+
+    const treatmentRecord = await TreatmentRecord.findOne({ patientId }).sort({
+      admissionDate: -1,
+    });
+    const admissionDate = treatmentRecord?.admissionDate || new Date();
+
+    const { riskScore, riskFlags } = mockRiskPrediction(patient);
+    const aiReportSummary = mockAIReportSummary(patient, riskScore, riskFlags);
+    const nextAppointment = mockSmartScheduling(admissionDate, riskScore);
 
     return res.status(200).json({
       success: true,
-      message:
-        patients.length > 0
-          ? "Patients retrieved successfully!"
-          : "No patient details found!",
-      patients,
+      aiReport: {
+        riskScore,
+        riskFlags,
+        summary: aiReportSummary,
+        nextAppointmentDate: nextAppointment,
+      },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error retrieving patient details!",
-      error: error.message,
-    });
-  }
-};
-
-// Get Single Patient
-exports.getSinglePatient = async (req, res) => {
-  try {
-    const patientId = req.params.id;
-
-    const patientDetail = await Patient.findById(patientId)
-      .populate({ path: "ward", select: "wardName _id" })
-      .populate("doctors");
-
-    if (!patientDetail) {
-      return res.status(404).json({
-        success: false,
-        message: "Patient not found!",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      patientDetail,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
 // Update Patient
 exports.updatePatient = async (req, res) => {
   try {
-    const { id: patientId } = req.params;
-    const updateData = req.body;
-    const { removeTreatedPatient, doctorId } = req.body; // Assuming `removeTreatedPatient` and `doctorId` are in the request
+    const patientId = req.params.id;
+    const updateData = { ...req.body };
+    if (req.file) updateData.image = req.file.path;
 
-    const patientDetail = await Patient.findById(patientId);
-    if (!patientDetail) {
-      return res.status(404).json({
-        success: false,
-        message: "Patient not found!",
-      });
-    }
+    if (updateData.password)
+      updateData.password = await bcrypt.hash(updateData.password, 10);
 
-    // If the removeTreatedPatient flag is set and a doctorId is provided, remove the patient from the doctor's treated list
-    if (removeTreatedPatient && doctorId) {
-      // Remove the patient from the specified doctor's treatedPatients list
-      await Doctor.findByIdAndUpdate(
-        doctorId,
-        { $pull: { treatedPatients: patientId } },
-        { new: true }
-      );
+    if (updateData.conditions && !Array.isArray(updateData.conditions))
+      updateData.conditions = [updateData.conditions]; // ensure array
 
-      // Also remove the doctor from the patient's treatedBy list
-      await Patient.findByIdAndUpdate(patientId, {
-        $pull: { treatedBy: doctorId },
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Patient removed from treated list successfully!",
-      });
-    }
-
-    // Don't allow contact update
-    if (updateData.contact) {
-      delete updateData.contact;
-    }
-
-    if (updateData.doctors && !Array.isArray(updateData.doctors)) {
-      if (typeof updateData.doctors === "string") {
-        updateData.doctors = [updateData.doctors];
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: "'doctors' field must be an array or valid string!",
-        });
-      }
-    }
-
-    // 🆕 Ward capacity check and transfer handling
-    if (updateData.ward && updateData.ward !== String(patientDetail.ward)) {
-      const newWard = await Ward.findById(updateData.ward);
-
-      if (!newWard) {
-        return res.status(400).json({
-          success: false,
-          message: "The selected ward does not exist!",
-        });
-      }
-
-      if (newWard.occupiedBeds >= newWard.capacity) {
-        return res.status(400).json({
-          success: false,
-          message: "Ward is full. Cannot transfer patient!",
-        });
-      }
-
-      // Decrease old ward's occupiedBeds and remove patient from old ward
-      await Ward.findByIdAndUpdate(patientDetail.ward, {
-        $inc: { occupiedBeds: -1 },
-        $pull: { patients: patientId },
-      });
-
-      // Increase new ward's occupiedBeds and add patient to new ward
-      await Ward.findByIdAndUpdate(updateData.ward, {
-        $inc: { occupiedBeds: 1 },
-        $push: { patients: patientId },
-      });
-    }
-
-    // Find the fields that have changed by comparing old and new data
-    let changedFields = [];
-    for (let key in updateData) {
-      if (updateData[key] !== patientDetail[key]) {
-        changedFields.push(key);
-      }
-    }
-
-    // If no fields are updated, just return
-    if (changedFields.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "No changes detected for the patient.",
-        patient: patientDetail,
-      });
-    }
-
-    // Perform the update on the patient
     const updatedPatient = await Patient.findByIdAndUpdate(
       patientId,
       updateData,
-      { new: true, runValidators: true }
+      { new: true }
     )
       .populate({ path: "ward", select: "wardName _id" })
-      .populate("doctors");
+      .populate({ path: "doctors", select: "doctorName _id" })
+      .select("-password");
 
-    // Find the most recent treatment record created on update
-    const latestTreatmentRecord = await TreatmentRecord.findOne({
-      patientId: patientId,
-    })
-      .sort({ admissionDate: -1 }) // Sort by the most recent treatment record
-      .skip(1) // Skip the first record (initial treatment record)
-      .limit(1);
+    if (!updatedPatient)
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
 
-    if (!latestTreatmentRecord) {
-      // If no record exists (means patient is being updated for the first time), create a new record
-      const newTreatmentRecord = new TreatmentRecord({
-        patientId: updatedPatient._id,
-        doctorId: updateData.doctors?.[0] || patientDetail.doctors[0], // First doctor if exists
-        wardId: updateData.ward || patientDetail.ward,
-        treatmentDetails: `Patient updated. Updates in: ${changedFields.join(
-          ", "
-        )}`,
-        admissionDate: new Date(),
-      });
-      await newTreatmentRecord.save();
-    } else {
-      // If a treatment record exists (not the initial record), update it
-      latestTreatmentRecord.treatmentDetails = `Patient updated. Updates in: ${changedFields.join(
-        ", "
-      )}`;
-      latestTreatmentRecord.admissionDate = new Date(); // Update the date to the current time
-      await latestTreatmentRecord.save();
-    }
-
-    // ✅ Update treatedPatients array in Doctor model if doctors are updated
-    if (updateData.doctors && updateData.doctors.length > 0) {
-      await Doctor.updateMany(
-        { _id: { $in: updateData.doctors } },
-        { $addToSet: { treatedPatients: updatedPatient._id } }
-      );
-    }
+    const { riskScore, riskFlags } = mockRiskPrediction(updatedPatient);
+    const aiReportSummary = mockAIReportSummary(
+      updatedPatient,
+      riskScore,
+      riskFlags
+    );
 
     return res.status(200).json({
       success: true,
-      message: "Patient updated successfully and treatment record updated!",
+      message: "Patient updated successfully",
       patient: updatedPatient,
-      treatmentRecord: latestTreatmentRecord, // Return updated treatment record
+      aiReport: { riskScore, riskFlags, summary: aiReportSummary },
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
 // Delete Patient
 exports.deletePatient = async (req, res) => {
   try {
-    const patientId = req.params.id;
+    const deletedPatient = await Patient.findByIdAndDelete(req.params.id);
+    if (!deletedPatient)
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
 
-    const patient = await Patient.findById(patientId);
-    if (!patient) {
-      return res.status(404).json({
-        success: false,
-        message: "Patient not found!",
-      });
-    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Patient deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
 
-    // Create a treatment record indicating patient discharge (deletion)
-    const dischargeTreatmentRecord = new TreatmentRecord({
-      patientId: patient._id,
-      doctorId: patient.doctors?.[0], // Assign the first doctor if exists
-      wardId: patient.ward,
-      treatmentDetails: "Patient discharged or deleted.",
-      admissionDate: patient.admissionDate,
-      dischargeDate: new Date(), // Set discharge date
+// Get All Patients
+exports.getAllPatients = async (req, res) => {
+  try {
+    const patients = await Patient.find()
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate({ path: "doctors", select: "doctorName _id" })
+      .select("-password");
+    return res.status(200).json({ success: true, patients });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+// Get Single Patient
+exports.getSinglePatient = async (req, res) => {
+  try {
+    const patientDetail = await Patient.findById(req.params.id)
+      .populate({ path: "ward", select: "wardName _id" })
+      .populate({ path: "doctors", select: "doctorName _id" })
+      .select("-password");
+    if (!patientDetail)
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found!" });
+
+    res.status(200).json({ success: true, patientDetail });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+// Stats Endpoints
+exports.getPatientCount = async (req, res) => {
+  try {
+    const count = await Patient.countDocuments();
+    res.status(200).json({ totalPatients: count });
+  } catch (error) {
+    res.status(500).json({ message: "Error getting patient count", error });
+  }
+};
+
+exports.getPatientsByAgeGroup = async (req, res) => {
+  try {
+    const groups = await Patient.aggregate([
+      {
+        $bucket: {
+          groupBy: "$age",
+          boundaries: [0, 18, 40, 60, 120],
+          default: "Other",
+          output: { count: { $sum: 1 } },
+        },
+      },
+    ]);
+    res.status(200).json(groups);
+  } catch (error) {
+    res.status(500).json({ message: "Error aggregating by age", error });
+  }
+};
+
+exports.getPatientsByGender = async (req, res) => {
+  try {
+    const groups = await Patient.aggregate([
+      { $group: { _id: "$gender", count: { $sum: 1 } } },
+    ]);
+    res.status(200).json(groups);
+  } catch (error) {
+    res.status(500).json({ message: "Error aggregating by gender", error });
+  }
+};
+
+exports.getAverageRiskScore = async (req, res) => {
+  try {
+    const patients = await Patient.find();
+    if (!patients.length) return res.json({ averageRiskScore: 0 });
+
+    let totalRisk = 0;
+    patients.forEach((patient) => {
+      const { riskScore } = mockRiskPrediction(patient);
+      totalRisk += riskScore;
     });
+    const averageRiskScore = totalRisk / patients.length;
 
-    // Save the discharge treatment record
-    await dischargeTreatmentRecord.save();
+    res.status(200).json({ averageRiskScore });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating average risk", error });
+  }
+};
 
-    // Update Ward
-    await Ward.updateMany(
-      { patients: patientId },
-      { $pull: { patients: patientId } }
+exports.getNextAppointmentSuggestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
+
+    const { riskScore } = mockRiskPrediction(patient);
+    const nextAppointment = mockSmartScheduling(
+      patient.admissionDate,
+      riskScore
     );
 
-    // Delete related treatment records (if needed)
-    await TreatmentRecord.deleteMany({ patientId: patientId });
-
-    // Delete patient
-    await Patient.findByIdAndDelete(patientId);
-
-    res.status(200).json({
-      success: true,
-      message: "Patient and their treatment records deleted successfully!",
-    });
+    res.status(200).json({ nextAppointment });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Error suggesting appointment", error });
   }
 };

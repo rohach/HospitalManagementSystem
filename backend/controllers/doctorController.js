@@ -3,6 +3,8 @@ const Patient = require("../models/patientModel");
 const Ward = require("../models/wardModel");
 const upload = require("../middleware/multer");
 const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // Register a Doctor
 // Register a Doctor
@@ -19,6 +21,7 @@ exports.registerDoctor = async (req, res) => {
       specialty,
       contact,
       email,
+      password,
     } = req.body;
 
     // If team is empty or invalid, set it to null
@@ -38,6 +41,8 @@ exports.registerDoctor = async (req, res) => {
       imageUrl = req.file.path;
     }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
     // Create a new doctor
     const newDoctor = new Doctor({
       name,
@@ -46,6 +51,7 @@ exports.registerDoctor = async (req, res) => {
       specialty,
       contact,
       email,
+      password: hashedPassword,
       treatedPatients: Array.isArray(treatedPatients)
         ? treatedPatients
         : treatedPatients

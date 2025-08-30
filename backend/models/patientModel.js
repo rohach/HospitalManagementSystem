@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const patientSchema = mongoose.Schema(
   {
     patientName: {
@@ -13,9 +14,18 @@ const patientSchema = mongoose.Schema(
       type: String,
       unique: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
+
     age: {
       type: Number,
       required: true,
+    },
+    dob: {
+      // optional if you want dynamic age calc
+      type: Date,
     },
     gender: {
       type: String,
@@ -58,6 +68,36 @@ const patientSchema = mongoose.Schema(
     transferred: {
       type: Boolean,
       default: false,
+    },
+    conditions: [
+      {
+        type: String,
+      },
+    ],
+    admissionDate: {
+      type: Date,
+    },
+    dischargeDate: {
+      type: Date,
+    },
+    lastAppointmentDate: {
+      type: Date,
+    },
+
+    // ----- AI-Driven Fields Added Below -----
+    aiRiskScore: {
+      // AI computed risk score from 0 to 1 (or percentage)
+      type: Number,
+      default: 0,
+    },
+    aiNextAppointment: {
+      // Smart scheduling recommendation date/time by AI
+      type: Date,
+    },
+    aiReportSummary: {
+      // AI generated summary for patient's report
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }

@@ -6,11 +6,22 @@ import { postData } from "../../../utils/api";
 import ToastifyComponent, { notify } from "../../pages/ToastMessage"; // Import notify function
 import { Link } from "react-router-dom";
 
+const conditionOptions = [
+  "Diabetes",
+  "Hypertension",
+  "Asthma",
+  "Heart Disease",
+  "Allergies",
+  "Kidney Disease",
+  "Liver Disease",
+  "Cancer",
+];
+
 const Login = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [conditions, setConditions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const defaultOptions = {
@@ -22,17 +33,16 @@ const Login = () => {
     },
   };
 
-  // Handle form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage("");
 
     try {
       const response = await postData("auth/register", {
         name,
         email,
         password,
+        conditions, // include conditions in registration
       });
       notify(response?.message, "success");
       window.location.href = "/";
@@ -41,6 +51,17 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConditionChange = (e) => {
+    const { options } = e.target;
+    const selected = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selected.push(options[i].value);
+      }
+    }
+    setConditions(selected);
   };
 
   return (
@@ -74,8 +95,31 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+
+            {/* Conditions Multi-Select */}
+            <label
+              htmlFor="conditions"
+              style={{ marginTop: "10px", display: "block" }}
+            >
+              Medical Conditions:
+            </label>
+            <select
+              id="conditions"
+              multiple
+              value={conditions}
+              onChange={handleConditionChange}
+              className="input_field"
+              style={{ height: "100px", padding: "8px" }}
+            >
+              {conditionOptions.map((cond, idx) => (
+                <option key={idx} value={cond}>
+                  {cond}
+                </option>
+              ))}
+            </select>
+
             <button className="submit" type="submit" disabled={loading}>
-              {loading ? "Logging in..." : "Sign Up"}
+              {loading ? "Signing up..." : "Sign Up"}
             </button>
           </form>
           <p className="register">

@@ -395,3 +395,11 @@ body .sidebar:has(#minimize:checked) .footer .switch .item {
 body .sidebar:has(#minimize:checked) .footer .switch .active:before {
   border-radius: 5rem;
 }
+@media (max-width: 900px) {
+  #sidebar {
+    width: 150px;
+  }
+  #content-wrapper {
+    padding-left: 150px !important;
+  }
+}

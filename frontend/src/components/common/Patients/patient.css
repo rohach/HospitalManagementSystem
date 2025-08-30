@@ -1,146 +1,218 @@
+* {
+  text-decoration: none !important;
+  box-sizing: border-box;
+}
+
 .patient {
-  padding: 1rem;
-}
-.patient_image {
-  height: 40px;
-  width: 40px;
-  object-fit: cover;
-  border-radius: 50%;
-}
-/* Patient's view */
-.patient_div {
-  display: flex;
-  gap: 2rem;
-  width: 98%;
-  padding: 3rem;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-}
-.patient_profile {
-  border-right: 1px solid rgb(198, 198, 198);
-  padding-right: 1rem;
-}
-.patient_img {
-  height: 200px;
-  width: 200px;
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  padding: 0.5rem;
-}
-.patient_name {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin: 0.5rem 0;
-}
-.email {
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-.delete_profile {
-  padding: 0.5rem 0.75rem;
-  border-radius: 50px;
-  color: rgb(235, 21, 21);
-  border: 1px solid rgb(235, 21, 21);
-  cursor: pointer;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-}
-.patient_info {
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-.patient_info_div {
-  width: calc(90% / 3);
-  padding: 1rem;
-  height: 30%;
-}
-.patient_info_div_title {
-  color: var(--text);
-}
-.patient_info_div_info {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-/* Popup */
-
-.ppcontainer {
-  width: 80%;
-  margin: 5px auto;
   padding: 2rem;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
 }
 
-.clearfix {
-  clear: both;
+.back_home {
+  margin-bottom: 1rem;
+  background: #4b4943;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.3s ease;
 }
 
-.form_title {
+.back_home:hover {
+  background: #33322f;
+}
+
+.doctors_heading {
   display: flex;
   justify-content: space-between;
-}
-.form-part h2 {
-  font-size: 25px;
-  font-weight: 400;
-  font-family: "Josefin Sans", sans-serif;
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.text-input,
-.radio-button,
-.check-boxes {
-  margin-bottom: 13px;
-  width: 100% !important;
+.add_doctor {
+  background: #5f2f15;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.3s ease;
 }
 
-.text-input label,
-.radio-button label,
-.check-boxes label {
-  display: block;
-  margin-bottom: 3px;
-  font-family: "Josefin Sans", sans-serif;
-  font-size: 14px;
+.add_doctor:hover {
+  background: #4c2410;
+}
+
+.patient_container {
+  overflow-x: auto;
+  margin-top: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+#customers {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#customers th,
+#customers td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+#customers th {
+  background-color: #334437;
+  color: white;
   font-weight: 600;
 }
 
-.radio-button label,
-.check-boxes label {
-  margin-bottom: 7px;
-  font-weight: 900;
+#customers tr:nth-child(even) {
+  background-color: #f4f4f4;
 }
 
-.text-input input,
-.text-input textarea,
-.text-input select {
-  padding: 10px 10px;
-  display: block;
+#customers tr:hover {
+  background-color: #eaeaea;
+}
+
+.patient_image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+}
+
+.action_button_div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action_button {
+  border: none;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  color: white;
+  border-radius: 4px;
+  transition: 0.3s ease;
+}
+
+.edit_button {
+  background-color: #334437;
+}
+
+.edit_button:hover {
+  background-color: #2a352d;
+}
+
+.delete_button {
+  background-color: #ad6f46;
+}
+
+.delete_button:hover {
+  background-color: #945e3b;
+}
+
+/* Popup Modal */
+.popup_form_container {
+  /* position: fixed; */
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  max-width: 100%;
   width: 100%;
-  border: solid 3px #ccc;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
 }
-.doctor-selection {
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form input,
+.form select {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
-.doctor-selection legend {
-  font-weight: bold;
-  padding: 0 5px;
+.form input:focus,
+.form select:focus {
+  border-color: #334437;
+  box-shadow: 0 0 6px rgba(51, 68, 55, 0.3);
+  outline: none;
 }
 
-.doctor-checkbox-group {
+.doctor_checkbox_group {
+  margin-top: 1rem;
+  border: none;
+  padding: 0;
+}
+
+.checkbox_label {
+  display: block;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.form_buttons {
+  margin-top: 1.5rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 
-.doctor-checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.submit_btn {
+  background-color: #334437;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.3s ease;
+}
+
+.submit_btn:hover {
+  background-color: #2a352d;
+}
+
+.cancel_btn {
+  background-color: #bbb;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.3s ease;
+}
+
+.cancel_btn:hover {
+  background-color: #999;
 }

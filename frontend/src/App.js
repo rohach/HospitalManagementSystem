@@ -57,11 +57,13 @@ function App() {
     const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
-      // Assign -1 if the role is not admin or doctor
+      // Assign -1 if the role is not admin or doctor (Patient)
       if (parsedUser.role === "admin") {
         setUserRole(1);
+        // 1 for admin
       } else if (parsedUser.role === "doctor") {
         setUserRole(0);
+        // 0 for doctor
       } else {
         setUserRole(-1); // Default for other users
       }

@@ -1,0 +1,256 @@
+/* ==================== PAGE WRAPPER ==================== */
+.admin-ai-container {
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 40px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c2c2c;
+  background: linear-gradient(135deg, #f9fbff, #eef2f9);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== HEADING ==================== */
+h1 {
+  text-align: center;
+  margin-bottom: 50px;
+  font-size: 2.6rem;
+  color: #1e2a3a;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  position: relative;
+}
+
+h1::after {
+  content: "";
+  width: 90px;
+  height: 4px;
+  background: linear-gradient(90deg, #4b94f4, #1e69d2);
+  display: block;
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+/* ==================== KPI CARDS ==================== */
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 60px;
+}
+
+.kpi {
+  flex: 1 1 200px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at top left,
+    rgba(75, 148, 244, 0.15),
+    transparent 60%
+  );
+  transform: rotate(25deg);
+}
+
+.kpi:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 14px 28px rgba(75, 148, 244, 0.25);
+}
+
+.kpi-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.kpi-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e69d2;
+}
+
+/* ==================== PATIENT LIST ==================== */
+.patients-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+.patient-card {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 25px 20px;
+  width: 260px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #f0f0f0;
+}
+
+.patient-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(30, 105, 210, 0.2);
+}
+
+.patient-card .avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4b94f4, #1e69d2);
+  color: #fff;
+  font-size: 36px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 12px rgba(75, 148, 244, 0.25);
+}
+
+.patient-card h2 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.patient-card p {
+  font-size: 0.95rem;
+  margin: 4px 0;
+  color: #555;
+}
+
+.status.admitted {
+  color: #28a745;
+  font-weight: bold;
+}
+.status.discharged {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* ==================== CHARTS ==================== */
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 35px;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+.chart-container {
+  flex: 1 1 500px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 25px;
+  border-radius: 15px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(240, 240, 240, 0.8);
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px rgba(75, 148, 244, 0.2);
+}
+
+.chart-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  color: #1e2a3a;
+  font-weight: 600;
+}
+
+/* ==================== HIGH-RISK TABLE ==================== */
+.table-container {
+  margin-top: 40px;
+}
+
+.table-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  color: #1e2a3a;
+}
+
+.table {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.thead,
+.tr {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 14px 18px;
+  font-size: 0.95rem;
+}
+
+.thead {
+  background: linear-gradient(135deg, #4b94f4, #1e69d2);
+  color: #fff;
+  font-weight: 600;
+}
+
+.tbody .tr:nth-child(odd) {
+  background: #f9fbff;
+}
+
+.tbody .tr:hover {
+  background: #eef4ff;
+  transition: background 0.2s ease;
+}
+
+.tbody .tr {
+  border-bottom: 1px solid #eee;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .chart-container {
+    flex: 1 1 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .patients-list {
+    flex-direction: column;
+    align-items: center;
+  }
+  .charts {
+    flex-direction: column;
+    align-items: center;
+  }
+  .kpis {
+    flex-direction: column;
+    align-items: center;
+  }
+  .thead,
+  .tr {
+    grid-template-columns: repeat(2, 1fr);
+    grid-row-gap: 8px;
+  }
+}

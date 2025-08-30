@@ -1,6 +1,187 @@
 .record_container {
   width: 95%;
+  margin: 0 auto;
+  overflow-x: auto; /* allow horizontal scroll on small screens */
+  padding: 1rem;
 }
+
+.table_responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
+
+/* Optional: Make the table width min 700px so it won't squeeze too much */
+#customers {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+/* Style table cells */
+#customers th,
+#customers td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  white-space: nowrap; /* prevent text from wrapping inside cells */
+}
+
 #customers {
   margin-top: 2rem;
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 700px; /* ensure table min width for scrolling */
+}
+
+#customers th {
+  color: black;
+}
+
+#customers th,
+#customers td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+#customers th {
+  background-color: #f4f4f4;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-badge.admitted {
+  background-color: #4caf50;
+}
+
+.status-badge.transferred {
+  background-color: #f44336;
+}
+
+.action_button_div button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #d9534f;
+}
+
+.back_home {
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ================= Add / Edit Treatment Record Form ================= */
+.add-record-form {
+  background-color: #ffffff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-record-form select,
+.add-record-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.add-record-form select:focus,
+.add-record-form textarea:focus {
+  border-color: #4b9ce2;
+}
+
+.add-record-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.add-record-form button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.add-record-form .btn-add {
+  background-color: #4b9ce2;
+  color: #fff;
+}
+
+.add-record-form .btn-add:hover {
+  background-color: #367dc1;
+}
+
+.add-record-form .btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+  margin-left: 10px;
+}
+
+.add-record-form .btn-cancel:hover {
+  background-color: #cfcfcf;
+}
+
+/* Optional: center the heading */
+.add-record-form h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  #customers {
+    font-size: 0.85rem;
+    min-width: 600px;
+  }
+  .add-record-form {
+    padding: 15px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  #customers {
+    font-size: 0.75rem;
+    min-width: 500px;
+  }
+  .back_home {
+    width: 100%;
+    font-size: 1rem;
+  }
+  .add-record-form {
+    padding: 12px 15px;
+    gap: 12px;
+  }
 }

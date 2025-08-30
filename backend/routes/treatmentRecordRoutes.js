@@ -18,7 +18,7 @@ router.get(
 );
 // Get all treatment records of a patient
 router.get(
-  "/treatmentRecords/:patientId",
+  "/treatmentRecords/patient/:patientId",
   treatmentRecordController.getTreatmentRecordsByPatientId
 );
 

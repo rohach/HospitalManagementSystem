@@ -3,6 +3,24 @@ const Doctor = require("../models/doctorModel");
 const Patient = require("../models/patientModel");
 const Notification = require("../models/notificationModel");
 
+// At the top of appointmentController.js, below your imports:
+
+// Service function for AI/chat to fetch appointments without res
+exports.fetchAppointmentsForAI = async (userId, role) => {
+  let filter = {};
+  if (userId && role) {
+    if (role === "doctor") filter.doctor = userId;
+    else if (role === "patient") filter.patient = userId;
+  }
+
+  const appointments = await Appointment.find(filter)
+    .populate("patient", "patientName email")
+    .populate("doctor", "name specialty email")
+    .sort({ appointmentDateTime: 1 });
+
+  return appointments;
+};
+
 // Create new Appointment (Patient books appointment)
 exports.createAppointment = async (req, res) => {
   try {
@@ -167,15 +185,23 @@ exports.updateAppointmentStatus = async (req, res) => {
     if (notes) appointment.notes = notes;
 
     await appointment.save();
+
+    // Populate doctor and patient before sending response
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate("patient", "patientName email")
+      .populate("doctor", "name specialty email");
+
     await Notification.create({
       user: appointment.patient,
       type: "appointment_updated",
       message: `Your appointment has been ${status}.`,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: "Appointment updated", appointment });
+    res.status(200).json({
+      success: true,
+      message: "Appointment updated",
+      appointment: populatedAppointment,
+    });
   } catch (error) {
     res
       .status(500)

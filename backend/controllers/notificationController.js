@@ -1,26 +1,24 @@
 const Notification = require("../models/notificationModel");
 const mongoose = require("mongoose");
 
-// Get all notifications for a user (patient)
-exports.getAllNotifications = async (req, res) => {
+// ===================== USER (Patient/Doctor) ===================== //
+exports.getUserNotifications = async (req, res) => {
   try {
-    const patientId = req.params.patientId; // from URL param
-
-    if (!patientId) {
+    const userId = req.params.patientId || req.params.doctorId;
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Missing patientId parameter",
+        message: "Missing userId parameter",
       });
     }
 
-    const userObjectId = new mongoose.Types.ObjectId(patientId);
-    const notifications = await Notification.find({ user: userObjectId }).sort({
-      createdAt: -1,
-    });
+    const notifications = await Notification.find({
+      user: new mongoose.Types.ObjectId(userId),
+    }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      message: "Notifications retrieved successfully",
+      message: "User notifications retrieved successfully",
       notifications,
     });
   } catch (error) {
@@ -32,11 +30,10 @@ exports.getAllNotifications = async (req, res) => {
   }
 };
 
-// Mark a single notification as read (by notification ID)
-exports.markAsRead = async (req, res) => {
+// Mark single notification as read (Patient/Doctor)
+exports.markUserNotificationAsRead = async (req, res) => {
   try {
     const notificationId = req.params.id;
-
     const notification = await Notification.findById(notificationId);
     if (!notification) {
       return res
@@ -47,47 +44,124 @@ exports.markAsRead = async (req, res) => {
     notification.isRead = true;
     await notification.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Notification marked as read",
-      notification,
-    });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Notification marked as read",
+        notification,
+      });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-// Mark all notifications as read for a patient (by patientId in URL)
-exports.markAllAsRead = async (req, res) => {
+// Mark all notifications as read (Patient/Doctor)
+exports.markAllUserNotificationsAsRead = async (req, res) => {
   try {
-    const patientId = req.params.patientId;
-
-    if (!patientId) {
+    const userId = req.params.patientId || req.params.doctorId;
+    if (!userId) {
       return res
         .status(400)
-        .json({ success: false, message: "Missing patientId parameter" });
+        .json({ success: false, message: "Missing userId parameter" });
     }
 
-    const userObjectId = new mongoose.Types.ObjectId(patientId);
-
     await Notification.updateMany(
-      { user: userObjectId, isRead: false },
-      { isRead: true }
+      { user: new mongoose.Types.ObjectId(userId), isRead: false },
+      { $set: { isRead: true } }
     );
+
+    res
+      .status(200)
+      .json({ success: true, message: "All notifications marked as read" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ===================== ADMIN ===================== //
+exports.getAllAdminNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      message: "All notifications marked as read",
+      message: "Admin notifications retrieved successfully",
+      notifications,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Mark single admin notification as read
+exports.markAdminNotificationAsRead = async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const notification = await Notification.findById(notificationId);
+    if (!notification) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
+    }
+
+    notification.isRead = true;
+    await notification.save();
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Admin notification marked as read",
+        notification,
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Mark all admin notifications as read
+exports.markAllAdminNotificationsAsRead = async (req, res) => {
+  try {
+    await Notification.updateMany(
+      { isRead: false },
+      { $set: { isRead: true } }
+    );
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "All admin notifications marked as read",
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Delete notification (admin only)
+exports.deleteNotification = async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const deleted = await Notification.findByIdAndDelete(notificationId);
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
+    }
+    res.status(200).json({ success: true, message: "Notification deleted" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };

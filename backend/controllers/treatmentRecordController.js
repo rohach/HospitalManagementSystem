@@ -183,24 +183,20 @@ exports.deleteTreatmentRecord = async (req, res) => {
 // Get all treatment records for a specific patient
 exports.getTreatmentRecordsByPatientId = async (req, res) => {
   try {
-    const { patientId } = req.params;
+    const patientId = req.params.patientId;
 
     const treatmentRecords = await TreatmentRecord.find({
-      patientId: new mongoose.Types.ObjectId(patientId),
+      patientId: patientId, // Let Mongoose cast string to ObjectId
     }).populate("patientId doctorId wardId");
 
-    if (treatmentRecords.length > 0) {
-      return res.status(200).json({
-        success: true,
-        message: `Treatment Records for patient ${patientId} retrieved successfully!`,
-        treatmentRecords,
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No Treatment Records found for this patient!",
-      });
-    }
+    return res.status(200).json({
+      success: true,
+      message:
+        treatmentRecords.length > 0
+          ? `Treatment Records for patient ${patientId} retrieved successfully!`
+          : "No Treatment Records found for this patient.",
+      treatmentRecords,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

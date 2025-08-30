@@ -1,0 +1,221 @@
+/* appointments.css */
+.add-appointment-form {
+  background-color: #fff;
+  padding: 25px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  align-items: center;
+}
+
+/* Make h3 span full width */
+.add-appointment-form h3 {
+  grid-column: 1 / -1;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+/* Inputs, selects, and DatePicker wrapper */
+.add-appointment-form select,
+.add-appointment-form input,
+.add-appointment-form .react-datepicker-wrapper {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.add-appointment-form .react-datepicker-wrapper {
+  display: inline-block;
+  width: 100%;
+}
+.add-appointment-form input::placeholder {
+  color: #999;
+}
+.add-appointment-form input[placeholder="Notes"] {
+  grid-column: 1 / -1;
+}
+/* Add button styling */
+.add-appointment-form button.btn-add {
+  grid-column: 1 / -1;
+  padding: 12px;
+  background-color: green;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, opacity 0.3s;
+}
+
+.add-appointment-form button.btn-add:hover {
+  opacity: 0.9;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead th {
+  padding: 12px;
+  text-align: left;
+}
+
+tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #eaeaea;
+}
+
+button {
+  background-color: red;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: rgb(168, 9, 9);
+}
+/* STATUS COLORS */
+.status {
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  display: inline-block;
+  text-align: center;
+  min-width: 90px;
+}
+
+.status.pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status.approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status.rescheduled {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+.appointment-container {
+  padding: 20px;
+}
+
+.appointment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-table th,
+.appointment-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.appointment-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background-color: orange;
+}
+
+.status-badge.approved {
+  background-color: green;
+}
+
+.status-badge.rejected {
+  background-color: red;
+}
+
+.status-badge.rescheduled {
+  background-color: blue;
+}
+
+button {
+  margin: 2px;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.btn-approve {
+  background: green;
+  color: white;
+}
+
+.btn-reject {
+  background: red;
+  color: white;
+}
+
+.btn-reschedule {
+  background: blue;
+  color: white;
+}
+
+.btn-delete {
+  background: gray;
+  color: white;
+}
+.reschedule-inline {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.reschedule-datepicker {
+  width: 180px;
+  font-size: 14px;
+  padding: 2px 5px;
+}

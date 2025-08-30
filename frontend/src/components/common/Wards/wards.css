@@ -1,3 +1,142 @@
+/* Container adjustments */
+.container.wards {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Ward card grid */
+.doctors_container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* Individual ward card */
 .ward_div {
-  height: auto !important;
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: auto !important; /* Keep your original */
+}
+
+/* Responsive typography */
+.doc_name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.grade {
+  font-size: 1rem;
+  margin: 0.2rem 0;
+}
+
+/* Buttons */
+.action_button,
+.add_doctor {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+/* Pagination */
+#pagination {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+}
+
+#pagination li {
+  margin: 0 0.3rem;
+}
+
+#pagination a {
+  display: inline-block;
+  padding: 0.5rem 0.8rem;
+  border-radius: 5px;
+  background-color: #bbb;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+#pagination a.active,
+#pagination a:hover:not(.disabled) {
+  background-color: #4b4943;
+}
+
+#pagination a.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Popup form */
+.popup .ppcontainer {
+  max-width: 500px;
+  width: 90%;
+  margin: 1.5rem auto;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive inputs */
+.form-inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-input {
+  margin-bottom: 1rem;
+}
+
+.text-input label {
+  margin-bottom: 0.3rem;
+  display: block;
+  font-weight: 600;
+}
+
+.text-input input,
+.text-input select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .doctors_heading h2 {
+    font-size: 1.5rem;
+  }
+
+  .add_doctor {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .doc_name {
+    font-size: 1.1rem;
+  }
+
+  .grade {
+    font-size: 0.9rem;
+  }
+
+  /* Reduce padding in popup */
+  .popup .ppcontainer {
+    padding: 0.8rem;
+  }
 }

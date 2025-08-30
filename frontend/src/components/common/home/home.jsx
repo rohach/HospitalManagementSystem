@@ -173,87 +173,96 @@ const Home = () => {
 
       <div className="patients">
         <div className="title">View Patients</div>
-        <table id="customers">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Admitted Date</th>
-              <th>Gender</th>
-              <th>Age</th>
-              <th>Ward</th>
-              <th>Contact</th>
-              <th>Status</th>
-              <th>Doctor</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {patients.length > 0 ? (
-              patients.map((patient) => (
-                <tr key={patient._id}>
-                  <td>
-                    {patient.patientName} {patient.patientCaste}
-                  </td>
-                  <td>{formatDate(patient.createdAt)}</td>
-                  <td>{patient.gender}</td>
-                  <td>{patient.age}</td>
-                  <td>{patient.ward?.wardName || "N/A"}</td>
-                  <td>{patient.contact}</td>
-                  <td>
-                    <span
-                      className={`status-badge ${
-                        patient.status === "Admitted"
-                          ? "admitted"
-                          : "discharged"
-                      }`}
-                    >
-                      {patient.status}
-                    </span>
-                  </td>
-                  <td>
-                    {patient.doctors?.length
-                      ? patient.doctors.map((doc, i) => (
-                          <span key={doc._id}>
-                            {doc.name}
-                            {i < patient.doctors.length - 1 && ", "}
-                          </span>
-                        ))
-                      : "N/A"}
-                  </td>
+        <div className="table_responsive">
+          <table id="customers">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Admitted Date</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Ward</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Doctor</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {patients.length > 0 ? (
+                patients.map((patient) => (
+                  <tr key={patient._id}>
+                    <td>
+                      {patient.patientName} {patient.patientCaste}
+                    </td>
+                    <td>{formatDate(patient.createdAt)}</td>
+                    <td>{patient.gender}</td>
+                    <td>{patient.age}</td>
+                    <td>{patient.ward?.wardName || "N/A"}</td>
+                    <td>{patient.contact}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${
+                          patient.status === "Admitted"
+                            ? "admitted"
+                            : "discharged"
+                        }`}
+                      >
+                        {patient.status}
+                      </span>
+                    </td>
+                    <td>
+                      {patient.doctors?.length
+                        ? patient.doctors.map((doc, i) => {
+                            // If patient.doctors is just array of {_id}, use doc._id
+                            const doctorId = doc._id || doc;
+                            const doctor = doctors.find(
+                              (d) => d._id === doctorId
+                            );
+                            return (
+                              <span key={doctorId}>
+                                {doctor ? doctor.name : "Unknown Doctor"}
+                                {i < patient.doctors.length - 1 && ", "}
+                              </span>
+                            );
+                          })
+                        : "N/A"}
+                    </td>
 
-                  {/* This line displays the doctor's name */}
-                  <td className="action_button_div">
-                    <Link to={`/update/${patient._id}`}>
-                      <button className="action_button" title="Edit">
-                        <i className="fa-solid fa-pen-to-square"></i>
+                    {/* This line displays the doctor's name */}
+                    <td className="action_button_div">
+                      <Link to={`/update/${patient._id}`}>
+                        <button className="action_button" title="Edit">
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                      </Link>
+                      <button
+                        className="action_button"
+                        title="Delete"
+                        onClick={() => deletePatient(patient._id)}
+                      >
+                        <i className="fa-solid fa-trash-can"></i>
                       </button>
-                    </Link>
-                    <button
-                      className="action_button"
-                      title="Delete"
-                      onClick={() => deletePatient(patient._id)}
-                    >
-                      <i className="fa-solid fa-trash-can"></i>
-                    </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="9"
+                    style={{
+                      textAlign: "center",
+                      padding: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    No patient data found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  style={{
-                    textAlign: "center",
-                    padding: "10px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  No patient data found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

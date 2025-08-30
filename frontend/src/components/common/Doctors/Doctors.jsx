@@ -22,6 +22,7 @@ const Doctors = ({ userRole }) => {
     juniorDoctors: "",
     wardId: "",
     treatedPatients: "",
+    password: "",
   });
 
   const [juniorDoctorsList, setJuniorDoctorsList] = useState([]);
@@ -75,6 +76,7 @@ const Doctors = ({ userRole }) => {
         juniorDoctors: "",
         wardId: "",
         treatedPatients: "",
+        password: "",
       });
     } catch (error) {
       notify(error.response?.data?.message || "Failed to add doctor", "error");
@@ -240,7 +242,7 @@ const Doctors = ({ userRole }) => {
                 ></i>
               </div>
               <form className="form-inputs" onSubmit={addDoctor}>
-                {["name", "contact", "email"].map((field) => (
+                {["name", "contact", "email", "password"].map((field) => (
                   <div className="text-input" key={field}>
                     <label htmlFor={field}>
                       {field.charAt(0).toUpperCase() + field.slice(1)}

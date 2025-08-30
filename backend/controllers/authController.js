@@ -1,4 +1,5 @@
 const Auth = require("../models/authModel");
+const Doctor = require("../models/doctorModel");
 const Patient = require("../models/patientModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -43,53 +44,80 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login
+// Combined Login Controller (checks Auth first, then Doctor, then Patient)
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await Auth.findOne({ email });
+    let user = await Auth.findOne({ email });
+    let roleType = "user"; // default role type
+
+    // If not found in Auth, check in Doctor
+    if (!user) {
+      user = await Doctor.findOne({ email });
+      roleType = "doctor";
+    }
+
+    // If not found in Doctor, check in Patient
+    if (!user) {
+      user = await Patient.findOne({ email });
+      roleType = "patient";
+    }
+
+    // If user not found in any collection
     if (!user) {
       return res.status(400).json({
         success: false,
         message: "Invalid Email or Password",
       });
-    } else {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid Email or Password",
-        });
-      }
+    }
 
-      // Generate JWT Token
-      const token = jwt.sign(
-        {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-        },
-        SECRET_KEY,
-        {
-          expiresIn: "30m",
-        }
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Login Successful",
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Password",
       });
     }
 
-    // Comparing the Password
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        role:
+          roleType === "doctor"
+            ? "doctor"
+            : roleType === "patient"
+            ? "patient"
+            : user.role,
+      },
+      SECRET_KEY,
+      { expiresIn: "30m" }
+    );
+
+    // Prepare response user object
+    const responseUser = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role:
+        roleType === "doctor"
+          ? "doctor"
+          : roleType === "patient"
+          ? "patient"
+          : user.role,
+    };
+
+    if (roleType === "doctor") responseUser.specialty = user.specialty;
+
+    res.status(200).json({
+      success: true,
+      message: "Login Successful",
+      token,
+      user: responseUser,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -99,10 +127,13 @@ exports.login = async (req, res) => {
   }
 };
 
-// Get all Users
+// Get all Users (Auth + Patients)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await Auth.find().select("-password");
+    const authUsers = await Auth.find().select("-password");
+    const patientUsers = await Patient.find().select("-password");
+
+    const users = [...authUsers, ...patientUsers];
 
     if (users.length === 0) {
       return res.status(200).json({
@@ -139,9 +170,8 @@ exports.getSingleUser = async (req, res) => {
 
     let user = await Auth.findById(id).select("-password");
 
-    if (!user) {
-      user = await Patient.findById(id).select("-password");
-    }
+    if (!user) user = await Patient.findById(id).select("-password");
+    if (!user) user = await Doctor.findById(id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -176,10 +206,8 @@ exports.deleteUser = async (req, res) => {
     }
 
     let user = await Auth.findByIdAndDelete(id);
-
-    if (!user) {
-      user = await Patient.findByIdAndDelete(id);
-    }
+    if (!user) user = await Patient.findByIdAndDelete(id);
+    if (!user) user = await Doctor.findByIdAndDelete(id);
 
     if (!user) {
       return res.status(404).json({
@@ -228,13 +256,19 @@ exports.updateUser = async (req, res) => {
       { new: true }
     ).select("-password");
 
-    if (!updatedUser) {
+    if (!updatedUser)
       updatedUser = await Patient.findByIdAndUpdate(
         id,
         { name, email, role },
         { new: true }
       ).select("-password");
-    }
+
+    if (!updatedUser)
+      updatedUser = await Doctor.findByIdAndUpdate(
+        id,
+        { name, email, role },
+        { new: true }
+      ).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({

@@ -1,0 +1,112 @@
+/* ===================== Container ===================== */
+.my-appointments-container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 25px 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===================== Title ===================== */
+.my-appointments-container h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 25px;
+}
+
+/* ===================== Table Styles ===================== */
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.appointments-table th,
+.appointments-table td {
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: center;
+}
+
+.appointments-table th {
+  background-color: #334437;
+  color: #fff;
+  font-weight: 600;
+}
+
+.appointments-table td {
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+}
+
+.appointments-table tr:hover td {
+  background-color: #eaeaea;
+  cursor: pointer;
+}
+
+/* ===================== Buttons ===================== */
+.cancel-btn,
+.delete-btn,
+.create-btn {
+  margin: 5px 2px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cancel-btn {
+  background: #ad6f46;
+}
+
+.cancel-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.delete-btn {
+  background: #5f2f15;
+}
+
+.delete-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.create-btn {
+  background: #334437;
+  display: block;
+  width: 100%;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.create-btn:hover {
+  transform: scale(1.03);
+  opacity: 0.9;
+}
+
+/* ===================== Responsive ===================== */
+@media (max-width: 768px) {
+  .appointments-table th,
+  .appointments-table td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+
+  .my-appointments-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+}

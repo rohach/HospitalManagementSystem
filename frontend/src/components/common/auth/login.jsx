@@ -3,7 +3,7 @@ import "./login.css";
 import Lottie from "react-lottie";
 import LoginAnimation from "../../../animations/login.json";
 import { postData } from "../../../utils/api";
-import ToastifyComponent, { notify } from "../../pages/ToastMessage"; // Import notify function
+import ToastifyComponent, { notify } from "../../pages/ToastMessage";
 import { Link } from "react-router-dom";
 
 const Login = () => {
@@ -21,7 +21,6 @@ const Login = () => {
     },
   };
 
-  // Handle form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -31,10 +30,16 @@ const Login = () => {
       const response = await postData("auth/login", { email, password });
       notify(response?.message, "success");
 
-      // Storing JWT token in localStorage
+      // Store token and user info
       localStorage.setItem("authToken", response?.token);
       localStorage.setItem("user", JSON.stringify(response?.user));
-      window.location.href = "/";
+
+      // Redirect based on role
+      if (response.user.role === "patient") {
+        window.location.href = `/profile/${response.user.id}`;
+      } else {
+        window.location.href = "/"; // admin or other roles
+      }
     } catch (error) {
       notify(error.response?.data?.message || "Login failed", "error");
     } finally {
@@ -52,7 +57,7 @@ const Login = () => {
             <input
               type="email"
               className="input_field"
-              placeholder="Your Username"
+              placeholder="Your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
