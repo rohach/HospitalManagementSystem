@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:4000/api/v1"; // Adjust to your backend URL
+const API_BASE_URL = "https://hospitalmanagementsystem-ltbc.onrender.com/api/v1"; // Updated to deployed backend URL
 
 const handleApiError = (error) => {
   const status = error.response?.status;
@@ -205,16 +205,19 @@ export const sendChatMessage = async ({
         ? messages
         : [{ role: "user", content: userMessage }];
 
-    const response = await fetch("http://localhost:4000/api/v1/ai/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userMessage,
-        userRole,
-        userId,
-        messages: chatMessages,
-      }),
-    });
+    const response = await fetch(
+      "https://hospitalmanagementsystem-ltbc.onrender.com/api/v1/ai/chat",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userMessage,
+          userRole,
+          userId,
+          messages: chatMessages,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errData = await response.json();
